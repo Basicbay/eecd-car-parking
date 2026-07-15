@@ -10,6 +10,9 @@ const ibmPlexSansThai = IBM_Plex_Sans_Thai({
 export const metadata: Metadata = {
   title: "ระบบจัดการที่จอดรถ | EECD Car Parking Management",
   description: "ระบบบริหารจัดการที่จอดรถและคูปองไวไฟ - EECD Car Parking Management System",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
