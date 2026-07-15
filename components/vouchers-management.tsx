@@ -32,46 +32,48 @@ interface WifiVoucher {
   usedByDevice?: string
 }
 
+const INITIAL_VOUCHERS: WifiVoucher[] = [
+  {
+    id: "1",
+    code: "EECD-WIFI-A5B2D",
+    duration: "1 ชั่วโมง",
+    speedLimit: "100/100 Mbps",
+    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+    expiresAt: new Date(Date.now() + 1000 * 60 * 40),
+    status: "Active"
+  },
+  {
+    id: "2",
+    code: "EECD-WIFI-9R3K1",
+    duration: "3 ชั่วโมง",
+    speedLimit: "100/100 Mbps",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2.5),
+    expiresAt: new Date(Date.now() + 1000 * 60 * 30),
+    status: "Active"
+  },
+  {
+    id: "3",
+    code: "EECD-WIFI-7X8C4",
+    duration: "5 ชั่วโมง",
+    speedLimit: "200/200 Mbps",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4),
+    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 1),
+    status: "Used",
+    usedByDevice: "iPhone 15 Pro (192.168.10.42)"
+  },
+  {
+    id: "4",
+    code: "EECD-WIFI-1Z9P8",
+    duration: "24 ชั่วโมง",
+    speedLimit: "500/500 Mbps",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 30),
+    expiresAt: new Date(Date.now() - 1000 * 60 * 60 * 6),
+    status: "Expired"
+  }
+]
+
 export default function VouchersManagement() {
-  const [vouchers, setVouchers] = useState<WifiVoucher[]>([
-    {
-      id: "1",
-      code: "EECD-WIFI-A5B2D",
-      duration: "1 ชั่วโมง",
-      speedLimit: "100/100 Mbps",
-      createdAt: new Date(Date.now() - 1000 * 60 * 20),
-      expiresAt: new Date(Date.now() + 1000 * 60 * 40),
-      status: "Active"
-    },
-    {
-      id: "2",
-      code: "EECD-WIFI-9R3K1",
-      duration: "3 ชั่วโมง",
-      speedLimit: "100/100 Mbps",
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2.5),
-      expiresAt: new Date(Date.now() + 1000 * 60 * 30),
-      status: "Active"
-    },
-    {
-      id: "3",
-      code: "EECD-WIFI-7X8C4",
-      duration: "5 ชั่วโมง",
-      speedLimit: "200/200 Mbps",
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4),
-      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 1),
-      status: "Used",
-      usedByDevice: "iPhone 15 Pro (192.168.10.42)"
-    },
-    {
-      id: "4",
-      code: "EECD-WIFI-1Z9P8",
-      duration: "24 ชั่วโมง",
-      speedLimit: "500/500 Mbps",
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 30),
-      expiresAt: new Date(Date.now() - 1000 * 60 * 60 * 6),
-      status: "Expired"
-    }
-  ])
+  const [vouchers, setVouchers] = useState<WifiVoucher[]>(INITIAL_VOUCHERS)
 
   // Search & Filter
   const [search, setSearch] = useState("")
@@ -319,7 +321,7 @@ export default function VouchersManagement() {
               <div className="flex gap-2">
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  onChange={(e) => setStatusFilter(e.target.value as "All" | "Active" | "Used" | "Expired")}
                   className="flex h-8.5 rounded-lg border border-border bg-card px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
                 >
                   <option value="All">ทุกสถานะคูปอง</option>

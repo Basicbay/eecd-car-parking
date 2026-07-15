@@ -32,65 +32,101 @@ interface Transaction {
   status: "Success" | "Failed"
 }
 
+const INITIAL_TRANSACTIONS: Transaction[] = [
+  {
+    id: "TXN-881A2D",
+    plate: "กข 1234",
+    province: "กรุงเทพฯ",
+    checkInTime: new Date(Date.now() - 1000 * 60 * 120),
+    paymentTime: new Date(Date.now() - 1000 * 60 * 10),
+    amount: 40,
+    method: "PromptPay",
+    status: "Success"
+  },
+  {
+    id: "TXN-994K5R",
+    plate: "3มง 9999",
+    province: "ชลบุรี",
+    checkInTime: new Date(Date.now() - 1000 * 60 * 300),
+    paymentTime: new Date(Date.now() - 1000 * 60 * 20),
+    amount: 100,
+    method: "Rabbit LINE Pay",
+    status: "Success"
+  },
+  {
+    id: "TXN-334X9C",
+    plate: "รน 8888",
+    province: "เชียงใหม่",
+    checkInTime: new Date(Date.now() - 1000 * 60 * 60 * 4),
+    paymentTime: new Date(Date.now() - 1000 * 60 * 60 * 3.5),
+    amount: 80,
+    method: "PromptPay",
+    status: "Success"
+  },
+  {
+    id: "TXN-112Z5P",
+    plate: "ฆฆ 7777",
+    province: "ขอนแก่น",
+    checkInTime: new Date(Date.now() - 1000 * 60 * 60 * 5),
+    paymentTime: new Date(Date.now() - 1000 * 60 * 60 * 4.9),
+    amount: 100,
+    method: "Cash",
+    status: "Success"
+  },
+  {
+    id: "TXN-554M8L",
+    plate: "สส 5555",
+    province: "ระยอง",
+    checkInTime: new Date(Date.now() - 1000 * 60 * 60 * 8),
+    paymentTime: new Date(Date.now() - 1000 * 60 * 60 * 7.8),
+    amount: 160,
+    method: "PromptPay",
+    status: "Failed"
+  }
+]
+
 export default function PaymentsManagement() {
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    {
-      id: "TXN-881A2D",
-      plate: "กข 1234",
-      province: "กรุงเทพฯ",
-      checkInTime: new Date(Date.now() - 1000 * 60 * 120),
-      paymentTime: new Date(Date.now() - 1000 * 60 * 10),
-      amount: 40,
-      method: "PromptPay",
-      status: "Success"
-    },
-    {
-      id: "TXN-994K5R",
-      plate: "3มง 9999",
-      province: "ชลบุรี",
-      checkInTime: new Date(Date.now() - 1000 * 60 * 300),
-      paymentTime: new Date(Date.now() - 1000 * 60 * 20),
-      amount: 100,
-      method: "Rabbit LINE Pay",
-      status: "Success"
-    },
-    {
-      id: "TXN-334X9C",
-      plate: "รน 8888",
-      province: "เชียงใหม่",
-      checkInTime: new Date(Date.now() - 1000 * 60 * 60 * 4),
-      paymentTime: new Date(Date.now() - 1000 * 60 * 60 * 3.5),
-      amount: 80,
-      method: "PromptPay",
-      status: "Success"
-    },
-    {
-      id: "TXN-112Z5P",
-      plate: "ฆฆ 7777",
-      province: "ขอนแก่น",
-      checkInTime: new Date(Date.now() - 1000 * 60 * 60 * 5),
-      paymentTime: new Date(Date.now() - 1000 * 60 * 60 * 4.9),
-      amount: 100,
-      method: "Cash",
-      status: "Success"
-    },
-    {
-      id: "TXN-554M8L",
-      plate: "สส 5555",
-      province: "ระยอง",
-      checkInTime: new Date(Date.now() - 1000 * 60 * 60 * 8),
-      paymentTime: new Date(Date.now() - 1000 * 60 * 60 * 7.8),
-      amount: 160,
-      method: "PromptPay",
-      status: "Failed"
-    }
-  ])
+  const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS)
+
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      const stored = localStorage.getItem("eecd_transactions")
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as Transaction[]
+          const txnsWithDates = parsed.map((t) => ({
+            ...t,
+            checkInTime: new Date(t.checkInTime),
+            paymentTime: new Date(t.paymentTime)
+          }))
+          setTransactions(txnsWithDates)
+        } catch (e) {
+          console.error("Failed to parse stored transactions:", e)
+        }
+      } else {
+        localStorage.setItem("eecd_transactions", JSON.stringify(INITIAL_TRANSACTIONS))
+      }
+    }, 0)
+    return () => clearTimeout(timeout)
+  }, [])
+
+  React.useEffect(() => {
+    localStorage.setItem("eecd_transactions", JSON.stringify(transactions))
+  }, [transactions])
 
   const [search, setSearch] = useState("")
   const [methodFilter, setMethodFilter] = useState<"All" | "PromptPay" | "Rabbit LINE Pay" | "Cash">("All")
 
   // Ticket Modal states
-  const [selectedVehicleForTicket, setSelectedVehicleForTicket] = useState<any | null>(null)
+  const [selectedVehicleForTicket, setSelectedVehicleForTicket] = useState<{
+    id: string
+    plate: string
+    province: string
+    slot: string
+    checkInTime: Date
+    fee?: number
+    wifiCode?: string
+  } | null>(null)
   const [isTicketOpen, setIsTicketOpen] = useState(false)
 
   // Calculated values
@@ -182,7 +218,7 @@ export default function PaymentsManagement() {
           <div className="flex gap-2">
             <select
               value={methodFilter}
-              onChange={(e) => setMethodFilter(e.target.value as any)}
+              onChange={(e) => setMethodFilter(e.target.value as "All" | "PromptPay" | "Rabbit LINE Pay" | "Cash")}
               className="flex h-8.5 rounded-lg border border-border bg-card px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
             >
               <option value="All">ทุกช่องทางชำระ</option>

@@ -136,6 +136,16 @@ export default function ParkingTicketModal({ isOpen, onClose, vehicle }: Parking
   const printAreaRef = useRef<HTMLDivElement>(null)
   const [copied, setCopied] = useState(false)
   const [downloading, setDownloading] = useState(false)
+  const [origin, setOrigin] = useState("https://eecd-carpark.com")
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const timeout = setTimeout(() => {
+        setOrigin(window.location.origin)
+      }, 0)
+      return () => clearTimeout(timeout)
+    }
+  }, [])
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -156,7 +166,7 @@ export default function ParkingTicketModal({ isOpen, onClose, vehicle }: Parking
   // Generate deterministic details
   const ticketId = `TKT-${vehicle.id.toUpperCase()}-${vehicle.slot.replace("-", "")}`
   const wifiCode = vehicle.wifiCode || `EECD-WIFI-${vehicle.id.toUpperCase()}`
-  const qrCodePayload = `https://eecd-carpark.com/pay/${vehicle.id}`
+  const qrCodePayload = `${origin}/pay/${vehicle.id}`
 
   // Print PDF Trigger
   const handlePrint = () => {

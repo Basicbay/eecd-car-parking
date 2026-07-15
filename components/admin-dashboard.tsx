@@ -37,51 +37,54 @@ interface WifiVoucher {
   status: "Active" | "Expired"
 }
 
-export default function AdminDashboard() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([
-    {
-      id: "1",
-      plate: "กข 1234",
-      province: "กรุงเทพฯ",
-      slot: "A-04",
-      checkInTime: new Date(Date.now() - 1000 * 60 * 15), // 15 mins ago
-      status: "Parked",
-      fee: 0,
-    },
-    {
-      id: "2",
-      plate: "3มง 9999",
-      province: "ชลบุรี",
-      slot: "B-12",
-      checkInTime: new Date(Date.now() - 1000 * 60 * 60 * 2.5), // 2.5 hours ago
-      status: "Parked",
-      fee: 40,
-    },
-    {
-      id: "3",
-      plate: "รน 8888",
-      province: "เชียงใหม่",
-      slot: "A-10",
-      checkInTime: new Date(Date.now() - 1000 * 60 * 60 * 4), // 4 hours ago
-      status: "Paid",
-      fee: 80,
-    },
-    {
-      id: "4",
-      plate: "ฆฆ 7777",
-      province: "ขอนแก่น",
-      slot: "C-03",
-      checkInTime: new Date(Date.now() - 1000 * 60 * 5), // 5 mins ago
-      status: "Parked",
-      fee: 0,
-    },
-  ])
+const INITIAL_DASHBOARD_VEHICLES: Vehicle[] = [
+  {
+    id: "1",
+    plate: "กข 1234",
+    province: "กรุงเทพฯ",
+    slot: "A-04",
+    checkInTime: new Date(Date.now() - 1000 * 60 * 15), // 15 mins ago
+    status: "Parked",
+    fee: 0,
+  },
+  {
+    id: "2",
+    plate: "3มง 9999",
+    province: "ชลบุรี",
+    slot: "B-12",
+    checkInTime: new Date(Date.now() - 1000 * 60 * 60 * 2.5), // 2.5 hours ago
+    status: "Parked",
+    fee: 40,
+  },
+  {
+    id: "3",
+    plate: "รน 8888",
+    province: "เชียงใหม่",
+    slot: "A-10",
+    checkInTime: new Date(Date.now() - 1000 * 60 * 60 * 4), // 4 hours ago
+    status: "Paid",
+    fee: 80,
+  },
+  {
+    id: "4",
+    plate: "ฆฆ 7777",
+    province: "ขอนแก่น",
+    slot: "C-03",
+    checkInTime: new Date(Date.now() - 1000 * 60 * 5), // 5 mins ago
+    status: "Parked",
+    fee: 0,
+  },
+]
 
-  const [vouchers, setVouchers] = useState<WifiVoucher[]>([
-    { code: "EECD-WIFI-8F92A", duration: "1 ชั่วโมง", createdAt: new Date(Date.now() - 1000 * 60 * 30), status: "Active" },
-    { code: "EECD-WIFI-3B12D", duration: "3 ชั่วโมง", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 1.5), status: "Active" },
-    { code: "EECD-WIFI-9C7E1", duration: "24 ชั่วโมง", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 25), status: "Expired" },
-  ])
+const INITIAL_DASHBOARD_VOUCHERS: WifiVoucher[] = [
+  { code: "EECD-WIFI-8F92A", duration: "1 ชั่วโมง", createdAt: new Date(Date.now() - 1000 * 60 * 30), status: "Active" },
+  { code: "EECD-WIFI-3B12D", duration: "3 ชั่วโมง", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 1.5), status: "Active" },
+  { code: "EECD-WIFI-9C7E1", duration: "24 ชั่วโมง", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 25), status: "Expired" },
+]
+
+export default function AdminDashboard() {
+  const [vehicles, setVehicles] = useState<Vehicle[]>(INITIAL_DASHBOARD_VEHICLES)
+  const [vouchers, setVouchers] = useState<WifiVoucher[]>(INITIAL_DASHBOARD_VOUCHERS)
 
   // Form states
   const [newPlate, setNewPlate] = useState("")
@@ -91,8 +94,15 @@ export default function AdminDashboard() {
   const [generatedVoucher, setGeneratedVoucher] = useState<string | null>(null)
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
 
-  // Ticket Modal states
-  const [selectedVehicleForTicket, setSelectedVehicleForTicket] = useState<any | null>(null)
+  const [selectedVehicleForTicket, setSelectedVehicleForTicket] = useState<{
+    id: string
+    plate: string
+    province: string
+    slot: string
+    checkInTime: Date
+    fee?: number
+    wifiCode?: string
+  } | null>(null)
   const [isTicketOpen, setIsTicketOpen] = useState(false)
 
   // Handle vehicle check-in
@@ -287,7 +297,7 @@ export default function AdminDashboard() {
       </section>
 
       {/* Live Activity Lists */}
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
 
         {/* Vehicles Table Card */}
         <div className="bg-card/60 border border-border/80 backdrop-blur-md rounded-2xl shadow-sm overflow-hidden flex flex-col">
