@@ -6,6 +6,12 @@ export default withAuth(
     const isLoggedIn = !!req.nextauth.token;
     const isOnAdmin = req.nextUrl.pathname.startsWith("/admin");
     const isOnLogin = req.nextUrl.pathname === "/login";
+    const isOnPay = req.nextUrl.pathname.startsWith("/pay");
+
+    // Allow customer payment pages to bypass auth checks completely
+    if (isOnPay) {
+      return NextResponse.next();
+    }
 
     if (isOnAdmin && !isLoggedIn) {
       return NextResponse.redirect(new URL("/login", req.nextUrl));
@@ -29,6 +35,6 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|next.svg|vercel.svg).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|next.svg|vercel.svg|pay).*)",
   ],
 };
