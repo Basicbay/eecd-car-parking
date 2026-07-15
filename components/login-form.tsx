@@ -1,43 +1,43 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { signIn } from "next-auth/react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { 
-  Lock, 
-  User, 
-  AlertCircle, 
-  Eye, 
-  EyeOff, 
-  ParkingSquare, 
-  Car, 
-  Wifi, 
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { signIn } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Lock,
+  User,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  ParkingSquare,
+  Car,
+  Wifi,
   Receipt,
   ArrowRight,
-  ShieldCheck
-} from "lucide-react"
+  ShieldCheck,
+} from "lucide-react";
 
 const loginSchema = z.object({
   username: z.string().min(1, { message: "กรุณากรอกชื่อผู้ใช้งาน" }),
   password: z.string().min(1, { message: "กรุณากรอกรหัสผ่าน" }),
-})
+});
 
-type LoginFormValues = z.infer<typeof loginSchema>
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") || "/admin"
-  
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/admin";
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -49,31 +49,31 @@ export default function LoginForm() {
       username: "admin",
       password: "admin1234",
     },
-  })
+  });
 
   const onSubmit = async (data: LoginFormValues) => {
-    setIsLoading(true)
-    setError(null)
-    
+    setIsLoading(true);
+    setError(null);
+
     try {
       const result = await signIn("credentials", {
         username: data.username,
         password: data.password,
         redirect: false,
-      })
+      });
 
       if (result?.error) {
-        setError("ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง")
-        setIsLoading(false)
+        setError("ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง");
+        setIsLoading(false);
       } else {
-        router.push(callbackUrl)
-        router.refresh()
+        router.push(callbackUrl);
+        router.refresh();
       }
     } catch (err) {
-      setError("เกิดข้อผิดพลาดในการเชื่อมต่อระบบ กรุณาลองใหม่อีกครั้ง")
-      setIsLoading(false)
+      setError("เกิดข้อผิดพลาดในการเชื่อมต่อระบบ กรุณาลองใหม่อีกครั้ง");
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen w-full bg-[#090A0C] text-foreground">
@@ -90,24 +90,31 @@ export default function LoginForm() {
           </div>
           <div>
             <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-1.5">
-              EECD <span className="text-primary text-xs font-semibold px-2 py-0.5 rounded bg-primary/10 border border-primary/20">PARKING</span>
+              EECD{" "}
+              <span className="text-primary text-xs font-semibold px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
+                PARKING
+              </span>
             </h1>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Management System</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
+              Management System
+            </p>
           </div>
         </div>
 
         {/* Live Mock Dashboard (Center Content) */}
-        <div className="my-auto max-w-lg z-10 space-y-8">
+        <div className="my-auto max-w-2xl z-10 space-y-8">
           <div className="space-y-3">
             <h2 className="text-4xl font-extrabold text-white tracking-tight leading-tight">
               ควบคุมการจอดรถและ <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-yellow-400 to-amber-300">
                 ระบบจัดการ Wi-Fi
-              </span> ในหนึ่งเดียว
+              </span>{" "}
+              ในหนึ่งเดียว
             </h2>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              ระบบศูนย์กลางจัดการข้อมูลรถเข้า-ออก อัตราค่าจอด บันทึกการสแกนจ่ายเงิน 
-              รวมถึงการสร้าง Voucher อินเทอร์เน็ตความเร็วสูงสำหรับผู้ใช้บริการลานจอดรถ
+              ระบบศูนย์กลางจัดการข้อมูลรถเข้า-ออก อัตราค่าจอด
+              บันทึกการสแกนจ่ายเงิน รวมถึงการสร้าง Voucher
+              อินเทอร์เน็ตความเร็วสูงสำหรับผู้ใช้บริการลานจอดรถ
             </p>
           </div>
 
@@ -115,47 +122,74 @@ export default function LoginForm() {
           <div className="grid grid-cols-2 gap-4">
             <div className="p-5 rounded-2xl bg-card/40 border border-border backdrop-blur-md space-y-3 hover:border-primary/20 transition-all duration-300">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground font-medium">ที่ว่างลานจอด</span>
+                <span className="text-xs text-muted-foreground font-medium">
+                  ที่ว่างลานจอด
+                </span>
                 <Car className="size-4 text-primary" />
               </div>
               <div className="space-y-1">
-                <p className="text-2xl font-bold text-white">128 <span className="text-sm font-normal text-muted-foreground">/ 150</span></p>
+                <p className="text-2xl font-bold text-white">
+                  128{" "}
+                  <span className="text-sm font-normal text-muted-foreground">
+                    / 150
+                  </span>
+                </p>
                 <div className="h-1.5 w-full bg-[#1A1D24] rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full" style={{ width: '85%' }}></div>
+                  <div
+                    className="h-full bg-primary rounded-full"
+                    style={{ width: "85%" }}
+                  ></div>
                 </div>
               </div>
             </div>
 
             <div className="p-5 rounded-2xl bg-card/40 border border-border backdrop-blur-md space-y-3 hover:border-primary/20 transition-all duration-300">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground font-medium">Wi-Fi Voucher วันนี้</span>
+                <span className="text-xs text-muted-foreground font-medium">
+                  Wi-Fi Voucher วันนี้
+                </span>
                 <Wifi className="size-4 text-primary" />
               </div>
               <div className="space-y-1">
-                <p className="text-2xl font-bold text-white">85 <span className="text-xs font-normal text-green-400 font-medium ml-1">+12%</span></p>
-                <p className="text-[10px] text-muted-foreground">รหัสคูปองพร้อมใช้งาน</p>
+                <p className="text-2xl font-bold text-white">
+                  85{" "}
+                  <span className="text-xs font-normal text-green-400 font-medium ml-1">
+                    +12%
+                  </span>
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  รหัสคูปองพร้อมใช้งาน
+                </p>
               </div>
             </div>
 
             <div className="p-5 rounded-2xl bg-card/40 border border-border backdrop-blur-md space-y-3 hover:border-primary/20 transition-all duration-300">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground font-medium">รายได้วันนี้</span>
+                <span className="text-xs text-muted-foreground font-medium">
+                  รายได้วันนี้
+                </span>
                 <Receipt className="size-4 text-primary" />
               </div>
               <div className="space-y-1">
                 <p className="text-2xl font-bold text-white">฿4,250</p>
-                <p className="text-[10px] text-muted-foreground">ชำระเงินสำเร็จ 42 รายการ</p>
+                <p className="text-[10px] text-muted-foreground">
+                  ชำระเงินสำเร็จ 42 รายการ
+                </p>
               </div>
             </div>
 
             <div className="p-5 rounded-2xl bg-card/40 border border-border backdrop-blur-md space-y-3 hover:border-primary/20 transition-all duration-300">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground font-medium">ความปลอดภัย</span>
+                <span className="text-xs text-muted-foreground font-medium">
+                  ความปลอดภัย
+                </span>
                 <ShieldCheck className="size-4 text-green-400" />
               </div>
               <div className="space-y-1">
                 <p className="text-2xl font-bold text-white">99.9%</p>
-                <p className="text-[10px] text-muted-foreground">ระบบออนไลน์ทํางานเสถียร</p>
+                <p className="text-[10px] text-muted-foreground">
+                  ระบบออนไลน์ทํางานเสถียร
+                </p>
               </div>
             </div>
           </div>
@@ -163,7 +197,9 @@ export default function LoginForm() {
 
         {/* Footer */}
         <div className="text-xs text-muted-foreground/80 z-10 flex justify-between items-center">
-          <span>&copy; {new Date().getFullYear()} EECD Car Park Management.</span>
+          <span>
+            &copy; {new Date().getFullYear()} EECD Car Park Management.
+          </span>
           <span className="flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
             Server Online
@@ -186,11 +222,15 @@ export default function LoginForm() {
             <h1 className="text-2xl font-bold tracking-tight text-white">
               EECD <span className="text-primary">PARKING</span>
             </h1>
-            <p className="text-xs text-muted-foreground">ระบบจัดการลานจอดรถสำหรับผู้ดูแล</p>
+            <p className="text-xs text-muted-foreground">
+              ระบบจัดการลานจอดรถสำหรับผู้ดูแล
+            </p>
           </div>
 
           <div className="space-y-2 text-center lg:text-left">
-            <h3 className="text-2xl font-bold text-white tracking-tight lg:text-3xl">เข้าสู่ระบบดูแลลานจอด</h3>
+            <h3 className="text-2xl font-bold text-white tracking-tight lg:text-3xl">
+              เข้าสู่ระบบดูแลลานจอด
+            </h3>
             <p className="text-sm text-muted-foreground">
               กรอกข้อมูลบัญชีผู้ใช้เพื่อเริ่มต้นจัดการระบบ
             </p>
@@ -220,6 +260,7 @@ export default function LoginForm() {
                     type="text"
                     placeholder="ใส่ชื่อผู้ใช้งานของคุณ"
                     className="pl-10"
+                    autoComplete="username"
                     disabled={isLoading}
                   />
                 </div>
@@ -246,6 +287,7 @@ export default function LoginForm() {
                     {...register("password")}
                     type={showPassword ? "text" : "password"}
                     placeholder="ใส่รหัสผ่านของคุณ"
+                    autoComplete="current-password"
                     className="pl-10 pr-10"
                     disabled={isLoading}
                   />
@@ -255,7 +297,11 @@ export default function LoginForm() {
                     className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-muted-foreground hover:text-white transition-colors duration-200"
                     tabIndex={-1}
                   >
-                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    {showPassword ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
                   </button>
                 </div>
                 {errors.password && (
@@ -302,5 +348,5 @@ export default function LoginForm() {
         </div>
       </div>
     </div>
-  )
+  );
 }

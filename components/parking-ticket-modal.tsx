@@ -137,6 +137,20 @@ export default function ParkingTicketModal({ isOpen, onClose, vehicle }: Parking
   const [copied, setCopied] = useState(false)
   const [downloading, setDownloading] = useState(false)
 
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose()
+      }
+    }
+    if (isOpen) {
+      window.addEventListener("keydown", handleKeyDown)
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [isOpen, onClose])
+
   if (!isOpen || !vehicle) return null
 
   // Generate deterministic details

@@ -286,234 +286,176 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      {/* Interactive Tools split */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Input actions forms */}
-        <div className="lg:col-span-4 space-y-6">
-          {/* Box 1: Vehicle Register */}
-          <div className="p-5 bg-card/60 border border-border/80 backdrop-blur-md rounded-2xl space-y-4 shadow-sm">
+      {/* Live Activity Lists */}
+      <div className="grid grid-cols-2 gap-5">
+
+        {/* Vehicles Table Card */}
+        <div className="bg-card/60 border border-border/80 backdrop-blur-md rounded-2xl shadow-sm overflow-hidden flex flex-col">
+          <div className="p-5 border-b border-[#22262F] flex items-center justify-between bg-card/20">
             <div className="flex items-center gap-2">
-              <PlusCircle className="size-4.5 text-primary" />
-              <h3 className="text-sm font-bold text-white">บันทึกรถเข้าจอด (Manual)</h3>
+              <Car className="size-4.5 text-primary" />
+              <h3 className="text-sm font-bold text-white">รายการรถยนต์เข้า-ออกล่าสุด</h3>
             </div>
-            
-            <form onSubmit={handleCheckIn} className="space-y-3">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold text-muted-foreground uppercase">ทะเบียนรถ</label>
-                <Input
-                  type="text"
-                  placeholder="เช่น กข 1234"
-                  value={newPlate}
-                  onChange={(e) => setNewPlate(e.target.value)}
-                  required
-                  className="h-9 text-xs"
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-semibold text-muted-foreground uppercase">จังหวัด</label>
-                  <select
-                    value={newProvince}
-                    onChange={(e) => setNewProvince(e.target.value)}
-                    className="flex h-9 w-full rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary transition-all"
-                  >
-                    <option value="กรุงเทพฯ">กรุงเทพฯ</option>
-                    <option value="ชลบุรี">ชลบุรี</option>
-                    <option value="เชียงใหม่">เชียงใหม่</option>
-                    <option value="ขอนแก่น">ขอนแก่น</option>
-                    <option value="ระยอง">ระยอง</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-semibold text-muted-foreground uppercase">ช่องจอด</label>
-                  <select
-                    value={newSlot}
-                    onChange={(e) => setNewSlot(e.target.value)}
-                    className="flex h-9 w-full rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary transition-all"
-                  >
-                    <option value="A-01">A-01 (Zone A)</option>
-                    <option value="A-02">A-02 (Zone A)</option>
-                    <option value="B-01">B-01 (Zone B)</option>
-                    <option value="B-02">B-02 (Zone B)</option>
-                    <option value="C-01">C-01 (Zone C)</option>
-                    <option value="C-02">C-02 (Zone C)</option>
-                  </select>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-semibold h-9 rounded-lg cursor-pointer"
-              >
-                บันทึกการเช็คอินรถเข้า
-              </Button>
-            </form>
           </div>
 
-          {/* Box 2: WiFi Voucher Generator */}
-          <div className="p-5 bg-card/60 border border-border/80 backdrop-blur-md rounded-2xl space-y-4 shadow-sm">
-            <div className="flex items-center gap-2">
-              <Wifi className="size-4.5 text-primary" />
-              <h3 className="text-sm font-bold text-white">สร้างคูปอง Wi-Fi Voucher</h3>
-            </div>
-
-            <div className="space-y-3">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold text-muted-foreground uppercase">ระยะเวลาสิทธิ์ใช้งาน</label>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {["1 ชั่วโมง", "3 ชั่วโมง", "24 ชั่วโมง"].map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setSelectedDuration(d)}
-                      className={`py-1.5 rounded-md text-[10px] font-semibold border transition-all ${
-                        selectedDuration === d
-                          ? "bg-primary/10 border-primary text-primary"
-                          : "border-border hover:bg-[#121418] text-muted-foreground"
-                      }`}
-                    >
-                      {d}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <Button
-                onClick={handleGenerateVoucher}
-                variant="outline"
-                className="w-full border-primary/20 bg-primary/5 text-primary hover:bg-primary/15 text-xs font-semibold h-9 rounded-lg cursor-pointer"
-              >
-                สร้างรหัส Voucher
-              </Button>
-
-              {generatedVoucher && (
-                <div className="p-3.5 rounded-lg bg-[#121418] border border-border space-y-2 animate-fadeIn">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">รหัสสร้างสำเร็จสำหรับลูกค้า</p>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-sm font-bold text-white bg-black/40 px-2.5 py-1.5 rounded border border-[#22262F] flex-1 text-center">
-                      {generatedVoucher}
-                    </span>
-                    <Button
-                      onClick={() => handleCopy(generatedVoucher)}
-                      size="icon"
-                      className="h-8.5 w-8.5 border border-[#22262F] bg-card hover:bg-muted text-muted-foreground shrink-0 cursor-pointer"
-                    >
-                      {copiedCode === generatedVoucher ? (
-                        <Check className="size-4 text-green-400" />
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-[#22262F] text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-black/20">
+                  <th className="py-3 px-4">ทะเบียนรถ</th>
+                  <th className="py-3 px-4">จังหวัด</th>
+                  <th className="py-3 px-4">ช่องจอด</th>
+                  <th className="py-3 px-4">เวลาเช็คอิน</th>
+                  <th className="py-3 px-4">อัตราค่าจอด</th>
+                  <th className="py-3 px-4">สถานะ</th>
+                  <th className="py-3 px-4 text-right">ดำเนินการ</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#1D212A]">
+                {vehicles.slice(0, 5).map((v) => (
+                  <tr key={v.id} className="hover:bg-[#121418]/45 transition-colors">
+                    <td className="py-3 px-4 font-bold text-white">{v.plate}</td>
+                    <td className="py-3 px-4 text-muted-foreground">{v.province}</td>
+                    <td className="py-3 px-4 font-mono text-primary font-semibold">{v.slot}</td>
+                    <td className="py-3 px-4 text-muted-foreground">
+                      {v.checkInTime.toLocaleTimeString("th-TH", { hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                    <td className="py-3 px-4 font-bold text-white">
+                      {v.status === "Exited" ? (
+                        <span className="text-muted-foreground font-normal line-through">฿{v.fee}</span>
+                      ) : v.fee === 0 ? (
+                        <span className="text-green-400 font-semibold">จอดฟรี</span>
                       ) : (
-                        <Copy className="size-4" />
+                        `฿${v.fee}`
                       )}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      {v.status === "Parked" && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-primary/10 border border-primary/20 text-primary px-2 py-0.5 rounded-full">
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
+                          กำลังจอด
+                        </span>
+                      )}
+                      {v.status === "Paid" && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
+                          <CheckCircle className="size-3" />
+                          ชำระเงินแล้ว
+                        </span>
+                      )}
+                      {v.status === "Exited" && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-[#22262F] text-muted-foreground px-2 py-0.5 rounded-full">
+                          ออกจากลานจอด
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex justify-end items-center gap-1.5">
+                        <button
+                          onClick={() => {
+                            setSelectedVehicleForTicket({
+                              ...v,
+                              wifiCode: `EECD-WIFI-${v.id.toUpperCase()}`
+                            })
+                            setIsTicketOpen(true)
+                          }}
+                          className="p-1 rounded bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1"
+                          title="ดูบัตรจอดรถ / Wi-Fi"
+                        >
+                          <FileText className="size-3.5" />
+                          บัตรจอด
+                        </button>
+                        {v.status === "Parked" && (
+                          <button
+                            onClick={() => handlePay(v.id)}
+                            className="px-2 py-1 rounded bg-[#EAB308]/10 hover:bg-[#EAB308]/20 border border-[#EAB308]/20 text-[#EAB308] text-[10px] font-semibold transition-all cursor-pointer"
+                          >
+                            จ่ายเงิน
+                          </button>
+                        )}
+                        {v.status === "Paid" && (
+                          <button
+                            onClick={() => handleExit(v.id)}
+                            className="px-2 py-1 rounded bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-400 text-[10px] font-semibold transition-all cursor-pointer"
+                          >
+                            ออก
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Right: Live Activity List */}
-        <div className="lg:col-span-8 space-y-6">
-          {/* Vehicles Table Card */}
-          <div className="bg-card/60 border border-border/80 backdrop-blur-md rounded-2xl shadow-sm overflow-hidden flex flex-col">
-            <div className="p-5 border-b border-[#22262F] flex items-center justify-between bg-card/20">
-              <div className="flex items-center gap-2">
-                <Car className="size-4.5 text-primary" />
-                <h3 className="text-sm font-bold text-white">รายการรถยนต์เข้า-ออกล่าสุด</h3>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-[#22262F] text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-black/20">
-                    <th className="py-3 px-4">ทะเบียนรถ</th>
-                    <th className="py-3 px-4">จังหวัด</th>
-                    <th className="py-3 px-4">ช่องจอด</th>
-                    <th className="py-3 px-4">เวลาเช็คอิน</th>
-                    <th className="py-3 px-4">อัตราค่าจอด</th>
-                    <th className="py-3 px-4">สถานะ</th>
-                    <th className="py-3 px-4 text-right">ดำเนินการ</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#1D212A]">
-                  {vehicles.slice(0, 5).map((v) => (
-                    <tr key={v.id} className="hover:bg-[#121418]/45 transition-colors">
-                      <td className="py-3 px-4 font-bold text-white">{v.plate}</td>
-                      <td className="py-3 px-4 text-muted-foreground">{v.province}</td>
-                      <td className="py-3 px-4 font-mono text-primary font-semibold">{v.slot}</td>
-                      <td className="py-3 px-4 text-muted-foreground">
-                        {v.checkInTime.toLocaleTimeString("th-TH", { hour: '2-digit', minute: '2-digit' })}
-                      </td>
-                      <td className="py-3 px-4 font-bold text-white">
-                        {v.status === "Exited" ? (
-                          <span className="text-muted-foreground font-normal line-through">฿{v.fee}</span>
-                        ) : v.fee === 0 ? (
-                          <span className="text-green-400 font-semibold">จอดฟรี</span>
-                        ) : (
-                          `฿${v.fee}`
-                        )}
-                      </td>
-                      <td className="py-3 px-4">
-                        {v.status === "Parked" && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-primary/10 border border-primary/20 text-primary px-2 py-0.5 rounded-full">
-                            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
-                            กำลังจอด
-                          </span>
-                        )}
-                        {v.status === "Paid" && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
-                            <CheckCircle className="size-3" />
-                            ชำระเงินแล้ว
-                          </span>
-                        )}
-                        {v.status === "Exited" && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-[#22262F] text-muted-foreground px-2 py-0.5 rounded-full">
-                            ออกจากลานจอด
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex justify-end items-center gap-1.5">
-                          <button
-                            onClick={() => {
-                              setSelectedVehicleForTicket({
-                                ...v,
-                                wifiCode: `EECD-WIFI-${v.id.toUpperCase()}`
-                              })
-                              setIsTicketOpen(true)
-                            }}
-                            className="p-1 rounded bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1"
-                            title="ดูบัตรจอดรถ / Wi-Fi"
-                          >
-                            <FileText className="size-3.5" />
-                            บัตรจอด
-                          </button>
-                          {v.status === "Parked" && (
-                            <button
-                              onClick={() => handlePay(v.id)}
-                              className="px-2 py-1 rounded bg-[#EAB308]/10 hover:bg-[#EAB308]/20 border border-[#EAB308]/20 text-[#EAB308] text-[10px] font-semibold transition-all cursor-pointer"
-                            >
-                              จ่ายเงิน
-                            </button>
-                          )}
-                          {v.status === "Paid" && (
-                            <button
-                              onClick={() => handleExit(v.id)}
-                              className="px-2 py-1 rounded bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-400 text-[10px] font-semibold transition-all cursor-pointer"
-                            >
-                              ออก
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {/* Wi-Fi Vouchers Table Card */}
+        <div className="bg-card/60 border border-border/80 backdrop-blur-md rounded-2xl shadow-sm overflow-hidden flex flex-col">
+          <div className="p-5 border-b border-[#22262F] flex items-center justify-between bg-card/20">
+            <div className="flex items-center gap-2">
+              <Wifi className="size-4.5 text-primary" />
+              <h3 className="text-sm font-bold text-white">รายการรหัส Wi-Fi Voucher ล่าสุด</h3>
             </div>
           </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-[#22262F] text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-black/20">
+                  <th className="py-3 px-4">รหัสคูปอง Wi-Fi</th>
+                  <th className="py-3 px-4">ระยะเวลา</th>
+                  <th className="py-3 px-4">วันที่/เวลาสร้าง</th>
+                  <th className="py-3 px-4">สถานะ</th>
+                  <th className="py-3 px-4 text-right">ดำเนินการ</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#1D212A]">
+                {vouchers.slice(0, 5).map((v) => (
+                  <tr key={v.code} className="hover:bg-[#121418]/45 transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-white tracking-wider">
+                      {v.code}
+                    </td>
+                    <td className="py-3 px-4 text-muted-foreground">{v.duration}</td>
+                    <td className="py-3 px-4 text-muted-foreground">
+                      {v.createdAt.toLocaleTimeString("th-TH", { hour: '2-digit', minute: '2-digit' })} ({v.createdAt.toLocaleDateString("th-TH", { day: 'numeric', month: 'short' })})
+                    </td>
+                    <td className="py-3 px-4">
+                      {v.status === "Active" ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
+                          <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                          เปิดใช้งาน
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-red-500/10 border border-red-500/20 text-red-400 px-2 py-0.5 rounded-full">
+                          หมดอายุ
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex justify-end gap-1.5">
+                        <button
+                          onClick={() => handleCopy(v.code)}
+                          className="p-1 rounded bg-[#121418] hover:bg-muted border border-border text-muted-foreground hover:text-white transition-all cursor-pointer"
+                          title="คัดลอกรหัสผ่าน"
+                        >
+                          {copiedCode === v.code ? (
+                            <Check className="size-3.5 text-green-400" />
+                          ) : (
+                            <Copy className="size-3.5" />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {vouchers.length === 0 && (
+            <div className="p-8 text-center text-muted-foreground">
+              ไม่มีรหัส Wi-Fi Voucher ในระบบ
+            </div>
+          )}
         </div>
       </div>
 
