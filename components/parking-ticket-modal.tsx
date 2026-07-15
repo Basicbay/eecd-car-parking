@@ -230,10 +230,19 @@ export default function ParkingTicketModal({ isOpen, onClose, vehicle }: Parking
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose()
+    }
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fadeIn">
+    <div
+      onClick={handleBackdropClick}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fadeIn cursor-pointer"
+    >
       {/* Modal Dialog container */}
-      <div className="relative w-full max-w-md bg-[#121418] border border-border/80 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-md bg-[#121418] border border-border/80 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] cursor-default">
         
         {/* Modal Header */}
         <div className="flex justify-between items-center p-4 border-b border-[#22262F] bg-black/40">

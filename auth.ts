@@ -1,9 +1,10 @@
-import NextAuth from "next-auth"
-import Credentials from "next-auth/providers/credentials"
+import { NextAuthOptions } from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials"
+import { getServerSession } from "next-auth/next"
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
-    Credentials({
+    CredentialsProvider({
       name: "Credentials",
       credentials: {
         username: { label: "Username", type: "text" },
@@ -17,7 +18,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
     })
   ],
-  secret: process.env.AUTH_SECRET || "eecd-car-park-secret-key-12345-smooth-yellow",
+  secret: process.env.NEXTAUTH_SECRET || "eecd-car-park-secret-key-12345-smooth-yellow-secret-key-998877",
   pages: {
     signIn: "/login",
   },
@@ -38,4 +39,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session
     }
   }
-})
+}
+
+export const auth = () => getServerSession(authOptions)

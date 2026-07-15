@@ -204,7 +204,7 @@ export default function AdminLayout({ children, adminEmail, adminName }: AdminLa
         </header>
 
         {/* Dynamic page content */}
-        <div className="p-6 space-y-6 max-w-7xl w-full mx-auto">
+        <div className="p-6 space-y-6 max-w-[1600px] w-full mx-auto">
           {children}
         </div>
       </main>
