@@ -12,8 +12,6 @@ import {
   Wifi,
   Receipt,
   LogOut,
-  Clock,
-  Sparkles,
   Search,
   Menu,
   X,

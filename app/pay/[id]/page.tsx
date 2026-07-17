@@ -21,6 +21,7 @@ import {
   ArrowLeft,
   Search,
   Sparkles,
+  Download,
 } from "lucide-react";
 
 // Types matching the rest of the application
@@ -33,89 +34,6 @@ interface Vehicle {
   status: "Parked" | "Paid" | "Exited";
   fee: number;
   imageUrl?: string;
-}
-
-// Procedural SVG QR Code Generator for PromptPay
-function MockQRCode({ value }: { value: string }) {
-  const size = 29;
-  const matrix = Array(size)
-    .fill(0)
-    .map(() => Array(size).fill(0));
-
-  const fillRect = (
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    val: number,
-  ) => {
-    for (let r = y; r < y + h; r++) {
-      for (let c = x; c < x + w; c++) {
-        if (r >= 0 && r < size && c >= 0 && c < size) {
-          matrix[r][c] = val;
-        }
-      }
-    }
-  };
-
-  // Draw finder patterns
-  fillRect(0, 0, 7, 7, 1);
-  fillRect(1, 1, 5, 5, 0);
-  fillRect(2, 2, 3, 3, 1);
-
-  fillRect(22, 0, 7, 7, 1);
-  fillRect(23, 1, 5, 5, 0);
-  fillRect(24, 2, 3, 3, 1);
-
-  fillRect(0, 22, 7, 7, 1);
-  fillRect(1, 23, 5, 5, 0);
-  fillRect(2, 24, 3, 3, 1);
-
-  // Alignment pattern
-  fillRect(18, 18, 5, 5, 1);
-  fillRect(19, 19, 3, 3, 0);
-  matrix[20][20] = 1;
-
-  // Seed deterministic hash
-  let hash = 0;
-  for (let i = 0; i < value.length; i++) {
-    hash = value.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      if (
-        (r < 8 && c < 8) ||
-        (r < 8 && c > 20) ||
-        (r > 20 && c < 8) ||
-        (r >= 18 && r <= 22 && c >= 18 && c <= 22)
-      ) {
-        continue;
-      }
-      const val = Math.abs(hash ^ (r * 123 + c * 456)) % 2 === 0 ? 1 : 0;
-      matrix[r][c] = val;
-    }
-  }
-
-  let pathData = "";
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      if (matrix[r][c] === 1) {
-        pathData += `M${c},${r} h1 v1 h-1 z `;
-      }
-    }
-  }
-
-  return (
-    <svg
-      className="w-40 h-40 mx-auto"
-      viewBox="0 0 29 29"
-      shapeRendering="crispEdges"
-    >
-      <rect width="29" height="29" fill="white" />
-      <path d={pathData} fill="black" />
-    </svg>
-  );
 }
 
 const MOCK_CAR_IMAGES = [
@@ -204,6 +122,123 @@ export default function CustomerPaymentPage() {
     cvv: "",
     name: "",
   });
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
+
+  // Generate PNG QR Code for download & long press capability
+  useEffect(() => {
+    if (!vehicle || vehicle.fee === 0 || selectedMethod !== "promptpay") return;
+
+    const value = `PROMPTYPAY-EECD-CARPARK-FEE-${vehicle.fee}`;
+    const size = 29;
+    const matrix = Array(size)
+      .fill(0)
+      .map(() => Array(size).fill(0));
+
+    const fillRect = (
+      x: number,
+      y: number,
+      w: number,
+      h: number,
+      val: number,
+    ) => {
+      for (let r = y; r < y + h; r++) {
+        for (let c = x; c < x + w; c++) {
+          if (r >= 0 && r < size && c >= 0 && c < size) {
+            matrix[r][c] = val;
+          }
+        }
+      }
+    };
+
+    // Draw finder patterns
+    fillRect(0, 0, 7, 7, 1);
+    fillRect(1, 1, 5, 5, 0);
+    fillRect(2, 2, 3, 3, 1);
+
+    fillRect(22, 0, 7, 7, 1);
+    fillRect(23, 1, 5, 5, 0);
+    fillRect(24, 2, 3, 3, 1);
+
+    fillRect(0, 22, 7, 7, 1);
+    fillRect(1, 23, 5, 5, 0);
+    fillRect(2, 24, 3, 3, 1);
+
+    // Alignment pattern
+    fillRect(18, 18, 5, 5, 1);
+    fillRect(19, 19, 3, 3, 0);
+    matrix[20][20] = 1;
+
+    // Seed deterministic hash
+    let hash = 0;
+    for (let i = 0; i < value.length; i++) {
+      hash = value.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (
+          (r < 8 && c < 8) ||
+          (r < 8 && c > 20) ||
+          (r > 20 && c < 8) ||
+          (r >= 18 && r <= 22 && c >= 18 && c <= 22)
+        ) {
+          continue;
+        }
+        const val = Math.abs(hash ^ (r * 123 + c * 456)) % 2 === 0 ? 1 : 0;
+        matrix[r][c] = val;
+      }
+    }
+
+    let pathData = "";
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (matrix[r][c] === 1) {
+          pathData += `M${c},${r} h1 v1 h-1 z `;
+        }
+      }
+    }
+
+    // Create SVG string with namespaces
+    const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" shape-rendering="crispEdges" width="400" height="400"><rect width="29" height="29" fill="white" /><path d="${pathData}" fill="black" /></svg>`;
+
+    const svgBlob = new Blob([svgString], {
+      type: "image/svg+xml;charset=utf-8",
+    });
+    const URL = window.URL || window.webkitURL || window;
+    const blobURL = URL.createObjectURL(svgBlob);
+
+    const image = new window.Image();
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 400;
+      canvas.height = 400;
+      const context = canvas.getContext("2d");
+      if (context) {
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, 400, 400);
+        context.drawImage(image, 0, 0, 400, 400);
+
+        try {
+          const pngURL = canvas.toDataURL("image/png");
+          setQrCodeDataUrl(pngURL);
+        } catch (err) {
+          console.error("Failed to generate QR Code PNG", err);
+        }
+      }
+      URL.revokeObjectURL(blobURL);
+    };
+    image.src = blobURL;
+  }, [vehicle, selectedMethod]);
+
+  const handleDownloadQR = () => {
+    if (!qrCodeDataUrl) return;
+    const downloadLink = document.createElement("a");
+    downloadLink.href = qrCodeDataUrl;
+    downloadLink.download = `promptpay-qr-${vehicle?.plate?.replace(/\s+/g, "") || "payment"}.png`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  };
 
   // Initialize client-side current time
   useEffect(() => {
@@ -540,6 +575,7 @@ export default function CustomerPaymentPage() {
                       </button>
 
                       <button
+                        type="button"
                         onClick={() => setSelectedMethod("linepay")}
                         className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer ${
                           selectedMethod === "linepay"
@@ -547,9 +583,8 @@ export default function CustomerPaymentPage() {
                             : "bg-black/20 border-[#22262F] hover:border-muted-foreground/30 text-muted-foreground hover:text-white"
                         }`}
                       >
-                        <span className="text-xs font-black uppercase tracking-tighter">
-                          Line Pay
-                        </span>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/line.png" alt="LINE" className="size-5 object-contain" />
                         <span className="text-xs font-bold">LINE Pay</span>
                       </button>
                     </div>
@@ -557,7 +592,7 @@ export default function CustomerPaymentPage() {
                     {/* Payment options details section */}
                     <div className="bg-black/30 border border-[#22262F] p-4 rounded-xl min-h-[160px] flex flex-col justify-center">
                       {selectedMethod === "promptpay" && (
-                        <div className="text-center space-y-3.5">
+                        <div className="text-center space-y-3.5 flex flex-col items-center">
                           {/* PromptPay Header */}
                           <div className="flex items-center justify-center gap-1 bg-[#0f2c59] py-1 px-3.5 rounded-lg border border-[#1d4c8a]/50 w-fit mx-auto">
                             <span className="text-xs font-black tracking-wide text-white uppercase">
@@ -569,13 +604,33 @@ export default function CustomerPaymentPage() {
                           </div>
                           {/* Procedural QR Code representing PromtPay */}
                           <div className="p-2.5 border border-[#22262F] bg-white inline-block rounded-xl mx-auto shadow-inner">
-                            <MockQRCode
-                              value={`PROMPTYPAY-EECD-CARPARK-FEE-${vehicle.fee}`}
-                            />
+                            {qrCodeDataUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={qrCodeDataUrl}
+                                alt="PromptPay QR Code"
+                                className="w-40 h-40 mx-auto select-all"
+                                style={{ WebkitTouchCallout: "default" }}
+                              />
+                            ) : (
+                              <div className="w-40 h-40 mx-auto flex items-center justify-center bg-white rounded-lg">
+                                <Loader2 className="size-6 text-[#090A0C] animate-spin" />
+                              </div>
+                            )}
                           </div>
+                          {/* Save QR Image Button */}
+                          <button
+                            type="button"
+                            onClick={handleDownloadQR}
+                            disabled={!qrCodeDataUrl}
+                            className="inline-flex items-center justify-center gap-1.5 text-xs font-bold bg-[#0f2c59] hover:bg-[#13386e] text-white border border-[#1d4c8a]/50 py-2 px-4 rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                          >
+                            <Download className="size-3.5" />
+                            บันทึกภาพ QR Code ลงเครื่อง
+                          </button>
                           <p className="text-xs text-muted-foreground max-w-[240px] mx-auto leading-normal">
-                            บันทึกภาพ QR Code
-                            หรือแสกนตรงเพื่อชำระผ่านแอปพลิเคชันธนาคารของคุณได้ทันที
+                            บันทึกภาพ QR Code (หรือกดค้างเพื่อบันทึก)
+                            และสแกนผ่านแอปธนาคารเพื่อชำระเงินได้ทันที
                           </p>
                         </div>
                       )}
@@ -651,15 +706,18 @@ export default function CustomerPaymentPage() {
                       )}
 
                       {selectedMethod === "linepay" && (
-                        <div className="text-center py-4 space-y-3">
-                          <div className="size-12 rounded-2xl bg-green-500/10 border border-green-500/20 text-green-400 flex items-center justify-center mx-auto text-sm font-black">
-                            L
-                          </div>
+                        <div className="text-center py-4 space-y-3 flex flex-col items-center">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src="/line.png"
+                            alt="LINE Pay"
+                            className="size-12 object-contain mx-auto"
+                          />
                           <div>
                             <p className="text-xs font-bold text-white">
                               Rabbit LINE Pay
                             </p>
-                            <p className="text-xs text-muted-foreground mt-0.5 leading-normal">
+                            <p className="text-xs text-muted-foreground mt-0.5 leading-normal max-w-[240px] mx-auto">
                               ชำระเงินสะดวกผ่านบัญชี Rabbit LINE Pay
                               หรือกระเป๋าเงิน LINE Wallet ของคุณ
                             </p>
@@ -830,9 +888,9 @@ export default function CustomerPaymentPage() {
       </main>
 
       {/* Footer Details */}
-      <footer className="border-t border-[#22262F] bg-[#121418]/25 py-4 text-center mt-auto">
-        <p className="text-xs text-muted-foreground">
-          ระบบจัดการลานจอดรถ EECD Car Parking • ปลอดภัย เชื่อถือได้ 24 ชั่วโมง
+      <footer className="border-t border-[#22262F] bg-[#121418]/25 py-4 px-2 text-center mt-auto">
+        <p className="text-xs text-muted-foreground text-balance">
+          ระบบจัดการลานจอดรถ EECD Car Parking ปลอดภัย เชื่อถือได้ 24 ชั่วโมง
         </p>
       </footer>
     </div>
