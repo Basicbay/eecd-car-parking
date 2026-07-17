@@ -106,6 +106,22 @@ function MockQRCode({ value }: { value: string }) {
   )
 }
 
+const MOCK_CAR_IMAGES = [
+  "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600&auto=format&fit=crop&q=80"
+]
+
+const MOCK_VEHICLES_DB: Vehicle[] = [
+  { id: "1", plate: "กข 1234", province: "กรุงเทพฯ", slot: "A-01", checkInTime: new Date(Date.now() - 1000 * 60 * 20), status: "Parked", fee: 20, imageUrl: MOCK_CAR_IMAGES[0] },
+  { id: "2", plate: "3มง 9999", province: "ชลบุรี", slot: "B-03", checkInTime: new Date(Date.now() - 1000 * 60 * 60 * 2.5), status: "Parked", fee: 60, imageUrl: MOCK_CAR_IMAGES[1] },
+  { id: "3", plate: "รน 8888", province: "เชียงใหม่", slot: "A-05", checkInTime: new Date(Date.now() - 1000 * 60 * 60 * 4), status: "Paid", fee: 80, imageUrl: MOCK_CAR_IMAGES[2] },
+  { id: "4", plate: "ฆฆ 7777", province: "ขอนแก่น", slot: "C-01", checkInTime: new Date(Date.now() - 1000 * 60 * 10), status: "Parked", fee: 0, imageUrl: MOCK_CAR_IMAGES[3] },
+  { id: "5", plate: "สส 5555", province: "ระยอง", slot: "B-01", checkInTime: new Date(Date.now() - 1000 * 60 * 60 * 6), status: "Exited", fee: 120, imageUrl: MOCK_CAR_IMAGES[4] },
+]
+
 export default function CustomerPaymentPage() {
   const params = useParams()
   const router = useRouter()
@@ -144,22 +160,11 @@ export default function CustomerPaymentPage() {
     document.title = "ชำระค่าบริการจอดรถ | EECD Parking"
 
     const fetchVehicle = () => {
-      const stored = localStorage.getItem("eecd_vehicles")
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored) as Vehicle[]
-          const found = parsed.find((v) => v.id === id)
-          if (found) {
-            setVehicle({
-              ...found,
-              checkInTime: new Date(found.checkInTime)
-            })
-            setSearchError("")
-            return
-          }
-        } catch (e) {
-          console.error("Error reading vehicles:", e)
-        }
+      const found = MOCK_VEHICLES_DB.find((v) => v.id === id)
+      if (found) {
+        setVehicle(found)
+        setSearchError("")
+        return
       }
       setVehicle(null)
     }
@@ -177,25 +182,16 @@ export default function CustomerPaymentPage() {
     e.preventDefault()
     if (!searchPlate.trim()) return
 
-    const stored = localStorage.getItem("eecd_vehicles")
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as Vehicle[]
-        // Match by license plate (case insensitive, remove spaces for looser matching)
-        const cleanSearch = searchPlate.replace(/\s+/g, "")
-        const found = parsed.find((v) => 
-          v.plate.replace(/\s+/g, "").includes(cleanSearch) || 
-          v.id.toLowerCase() === cleanSearch.toLowerCase()
-        )
+    const cleanSearch = searchPlate.replace(/\s+/g, "")
+    const found = MOCK_VEHICLES_DB.find((v) => 
+      v.plate.replace(/\s+/g, "").includes(cleanSearch) || 
+      v.id.toLowerCase() === cleanSearch.toLowerCase()
+    )
 
-        if (found) {
-          // Redirect to the matching ticket page
-          router.push(`/pay/${found.id}`)
-          return
-        }
-      } catch (e) {
-        console.error(e)
-      }
+    if (found) {
+      // Redirect to the matching ticket page
+      router.push(`/pay/${found.id}`)
+      return
     }
     setSearchError("ไม่พบข้อมูลทะเบียนรถยนต์ หรือหมายเลขบัตรจอดรถนี้ในระบบ")
   }
@@ -214,48 +210,13 @@ export default function CustomerPaymentPage() {
 
     // Simulate payment transaction delay
     setTimeout(() => {
-      // 1. Update vehicle status to "Paid" in localStorage
-      const stored = localStorage.getItem("eecd_vehicles")
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored) as Vehicle[]
-          const updated = parsed.map((v) => {
-            if (v.id === vehicle.id) {
-              return { ...v, status: "Paid" }
-            }
-            return v
-          })
-          localStorage.setItem("eecd_vehicles", JSON.stringify(updated))
-        } catch (e) {
-          console.error(e)
-        }
+      // 1. Update in-memory vehicle status to "Paid"
+      const found = MOCK_VEHICLES_DB.find(v => v.id === vehicle.id)
+      if (found) {
+        found.status = "Paid"
       }
 
-      // 2. Add transaction to payment history in localStorage
-      const storedTxns = localStorage.getItem("eecd_transactions")
-      const newTxn = {
-        id: `TXN-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-        plate: vehicle.plate,
-        province: vehicle.province,
-        checkInTime: vehicle.checkInTime.toISOString(),
-        paymentTime: new Date().toISOString(),
-        amount: vehicle.fee,
-        method: selectedMethod === "promptpay" ? "PromptPay" : selectedMethod === "card" ? "CreditCard" : "Rabbit LINE Pay",
-        status: "Success"
-      }
-      
-      let updatedTxns = [newTxn]
-      if (storedTxns) {
-        try {
-          const parsed = JSON.parse(storedTxns)
-          updatedTxns = [newTxn, ...parsed]
-        } catch (e) {
-          console.error(e)
-        }
-      }
-      localStorage.setItem("eecd_transactions", JSON.stringify(updatedTxns))
-
-      // 3. Update local component state
+      // 2. Update local component state
       setVehicle(prev => prev ? { ...prev, status: "Paid" } : null)
       setProcessing(false)
     }, 1800)
