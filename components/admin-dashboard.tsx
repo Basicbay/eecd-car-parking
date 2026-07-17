@@ -16,7 +16,8 @@ import {
   TrendingUp,
   Sparkles,
   Check,
-  FileText
+  FileText,
+  ExternalLink
 } from "lucide-react"
 
 // Types for Mock Data
@@ -85,6 +86,32 @@ const INITIAL_DASHBOARD_VOUCHERS: WifiVoucher[] = [
 export default function AdminDashboard() {
   const [vehicles, setVehicles] = useState<Vehicle[]>(INITIAL_DASHBOARD_VEHICLES)
   const [vouchers, setVouchers] = useState<WifiVoucher[]>(INITIAL_DASHBOARD_VOUCHERS)
+
+  // Sync with localStorage
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const stored = localStorage.getItem("eecd_vehicles")
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as Vehicle[]
+          const vehiclesWithDates = parsed.map((v) => ({
+            ...v,
+            checkInTime: new Date(v.checkInTime)
+          }))
+          setVehicles(vehiclesWithDates)
+        } catch (e) {
+          console.error("Failed to parse stored vehicles:", e)
+        }
+      } else {
+        localStorage.setItem("eecd_vehicles", JSON.stringify(INITIAL_DASHBOARD_VEHICLES))
+      }
+    }, 0)
+    return () => clearTimeout(timeout)
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem("eecd_vehicles", JSON.stringify(vehicles))
+  }, [vehicles])
 
   // Form states
   const [newPlate, setNewPlate] = useState("")
@@ -231,7 +258,7 @@ export default function AdminDashboard() {
           <div className="flex items-baseline justify-between">
             <div>
               <h3 className="text-3xl font-extrabold text-white tracking-tight">{availableSlots}</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5">จากทั้งหมด {totalSlots} ช่องจอด</p>
+              <p className="text-xs text-muted-foreground mt-0.5">จากทั้งหมด {totalSlots} ช่องจอด</p>
             </div>
             <span className="text-xs font-semibold text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">
               {Math.round((availableSlots / totalSlots) * 100)}% ว่าง
@@ -249,7 +276,7 @@ export default function AdminDashboard() {
           <div className="flex items-baseline justify-between">
             <div>
               <h3 className="text-3xl font-extrabold text-white tracking-tight">{activeParkedCount}</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5">จอดอยู่ ณ ขณะนี้</p>
+              <p className="text-xs text-muted-foreground mt-0.5">จอดอยู่ ณ ขณะนี้</p>
             </div>
             <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full flex items-center gap-1">
               <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
@@ -268,7 +295,7 @@ export default function AdminDashboard() {
           <div className="flex items-baseline justify-between">
             <div>
               <h3 className="text-3xl font-extrabold text-white tracking-tight">{vouchers.filter(v => v.status === "Active").length}</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5">ถูกสร้างในระบบวันนี้</p>
+              <p className="text-xs text-muted-foreground mt-0.5">ถูกสร้างในระบบวันนี้</p>
             </div>
             <span className="text-xs font-semibold text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
               <TrendingUp className="size-3" />
@@ -287,7 +314,7 @@ export default function AdminDashboard() {
           <div className="flex items-baseline justify-between">
             <div>
               <h3 className="text-3xl font-extrabold text-white tracking-tight">฿{todayRevenue}</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5">รวมค่าบริการชำระและค่าธรรมเนียม</p>
+              <p className="text-xs text-muted-foreground mt-0.5">รวมค่าบริการชำระและค่าธรรมเนียม</p>
             </div>
             <span className="text-xs font-semibold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">
               {vehicles.filter(v => v.status !== "Parked" || v.fee > 0).length} รายการ
@@ -311,7 +338,7 @@ export default function AdminDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-[#22262F] text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-black/20">
+                <tr className="border-b border-[#22262F] text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-black/20">
                   <th className="py-3 px-4">ทะเบียนรถ</th>
                   <th className="py-3 px-4">จังหวัด</th>
                   <th className="py-3 px-4">ช่องจอด</th>
@@ -324,7 +351,22 @@ export default function AdminDashboard() {
               <tbody className="divide-y divide-[#1D212A]">
                 {vehicles.slice(0, 5).map((v) => (
                   <tr key={v.id} className="hover:bg-[#121418]/45 transition-colors">
-                    <td className="py-3 px-4 font-bold text-white">{v.plate}</td>
+                    <td className="py-3 px-4 font-bold text-white">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span>{v.plate}</span>
+                        <button
+                          onClick={() => handleCopy(v.plate)}
+                          className="p-1 rounded hover:bg-[#1C2028] text-muted-foreground hover:text-white transition-colors cursor-pointer"
+                          title="คัดลอกทะเบียนรถ"
+                        >
+                          {copiedCode === v.plate ? (
+                            <Check className="size-3.5 text-green-400" />
+                          ) : (
+                            <Copy className="size-3.5" />
+                          )}
+                        </button>
+                      </span>
+                    </td>
                     <td className="py-3 px-4 text-muted-foreground">{v.province}</td>
                     <td className="py-3 px-4 font-mono text-primary font-semibold">{v.slot}</td>
                     <td className="py-3 px-4 text-muted-foreground">
@@ -341,19 +383,19 @@ export default function AdminDashboard() {
                     </td>
                     <td className="py-3 px-4">
                       {v.status === "Parked" && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-primary/10 border border-primary/20 text-primary px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold bg-primary/10 border border-primary/20 text-primary px-2 py-0.5 rounded-full">
                           <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
                           กำลังจอด
                         </span>
                       )}
                       {v.status === "Paid" && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
                           <CheckCircle className="size-3" />
                           ชำระเงินแล้ว
                         </span>
                       )}
                       {v.status === "Exited" && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-[#22262F] text-muted-foreground px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold bg-[#22262F] text-muted-foreground px-2 py-0.5 rounded-full">
                           ออกจากลานจอด
                         </span>
                       )}
@@ -368,16 +410,24 @@ export default function AdminDashboard() {
                             })
                             setIsTicketOpen(true)
                           }}
-                          className="p-1 rounded bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1"
+                          className="p-1.5 rounded bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 transition-all cursor-pointer flex items-center justify-center"
                           title="ดูบัตรจอดรถ / Wi-Fi"
                         >
                           <FileText className="size-3.5" />
-                          บัตรจอด
                         </button>
+                        <a
+                          href={`/pay/${v.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1.5 rounded bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-400 transition-all cursor-pointer flex items-center justify-center"
+                          title="เปิดลิงก์ชำระเงินฝั่งลูกค้า"
+                        >
+                          <ExternalLink className="size-3.5" />
+                        </a>
                         {v.status === "Parked" && (
                           <button
                             onClick={() => handlePay(v.id)}
-                            className="px-2 py-1 rounded bg-[#EAB308]/10 hover:bg-[#EAB308]/20 border border-[#EAB308]/20 text-[#EAB308] text-[10px] font-semibold transition-all cursor-pointer"
+                            className="px-2 py-1 rounded bg-[#EAB308]/10 hover:bg-[#EAB308]/20 border border-[#EAB308]/20 text-[#EAB308] text-xs font-semibold transition-all cursor-pointer"
                           >
                             จ่ายเงิน
                           </button>
@@ -385,7 +435,7 @@ export default function AdminDashboard() {
                         {v.status === "Paid" && (
                           <button
                             onClick={() => handleExit(v.id)}
-                            className="px-2 py-1 rounded bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-400 text-[10px] font-semibold transition-all cursor-pointer"
+                            className="px-2 py-1 rounded bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-400 text-xs font-semibold transition-all cursor-pointer"
                           >
                             ออก
                           </button>
@@ -411,42 +461,23 @@ export default function AdminDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-[#22262F] text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-black/20">
+                <tr className="border-b border-[#22262F] text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-black/20">
                   <th className="py-3 px-4">รหัสคูปอง Wi-Fi</th>
                   <th className="py-3 px-4">ระยะเวลา</th>
                   <th className="py-3 px-4">วันที่/เวลาสร้าง</th>
-                  <th className="py-3 px-4">สถานะ</th>
-                  <th className="py-3 px-4 text-right">ดำเนินการ</th>
+                  <th className="py-3 px-4 text-right">สถานะ</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#1D212A]">
                 {vouchers.slice(0, 5).map((v) => (
                   <tr key={v.code} className="hover:bg-[#121418]/45 transition-colors">
                     <td className="py-3 px-4 font-mono font-bold text-white tracking-wider">
-                      {v.code}
-                    </td>
-                    <td className="py-3 px-4 text-muted-foreground">{v.duration}</td>
-                    <td className="py-3 px-4 text-muted-foreground">
-                      {v.createdAt.toLocaleTimeString("th-TH", { hour: '2-digit', minute: '2-digit' })} ({v.createdAt.toLocaleDateString("th-TH", { day: 'numeric', month: 'short' })})
-                    </td>
-                    <td className="py-3 px-4">
-                      {v.status === "Active" ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
-                          <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                          เปิดใช้งาน
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-red-500/10 border border-red-500/20 text-red-400 px-2 py-0.5 rounded-full">
-                          หมดอายุ
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex justify-end gap-1.5">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span>{v.code}</span>
                         <button
                           onClick={() => handleCopy(v.code)}
-                          className="p-1 rounded bg-[#121418] hover:bg-muted border border-border text-muted-foreground hover:text-white transition-all cursor-pointer"
-                          title="คัดลอกรหัสผ่าน"
+                          className="p-1 rounded hover:bg-[#1C2028] text-muted-foreground hover:text-white transition-colors cursor-pointer"
+                          title="คัดลอกรหัสคูปอง"
                         >
                           {copiedCode === v.code ? (
                             <Check className="size-3.5 text-green-400" />
@@ -454,7 +485,23 @@ export default function AdminDashboard() {
                             <Copy className="size-3.5" />
                           )}
                         </button>
-                      </div>
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-muted-foreground">{v.duration}</td>
+                    <td className="py-3 px-4 text-muted-foreground">
+                      {v.createdAt.toLocaleTimeString("th-TH", { hour: '2-digit', minute: '2-digit' })} ({v.createdAt.toLocaleDateString("th-TH", { day: 'numeric', month: 'short' })})
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      {v.status === "Active" ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
+                          <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                          เปิดใช้งาน
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold bg-red-500/10 border border-red-500/20 text-red-400 px-2 py-0.5 rounded-full">
+                          หมดอายุ
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}

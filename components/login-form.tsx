@@ -95,7 +95,7 @@ export default function LoginForm() {
                 PARKING
               </span>
             </h1>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
+            <p className="text-xs text-muted-foreground uppercase tracking-widest">
               Management System
             </p>
           </div>
@@ -157,7 +157,7 @@ export default function LoginForm() {
                     +12%
                   </span>
                 </p>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   รหัสคูปองพร้อมใช้งาน
                 </p>
               </div>
@@ -172,7 +172,7 @@ export default function LoginForm() {
               </div>
               <div className="space-y-1">
                 <p className="text-2xl font-bold text-white">฿4,250</p>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   ชำระเงินสำเร็จ 42 รายการ
                 </p>
               </div>
@@ -187,7 +187,7 @@ export default function LoginForm() {
               </div>
               <div className="space-y-1">
                 <p className="text-2xl font-bold text-white">99.9%</p>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   ระบบออนไลน์ทํางานเสถียร
                 </p>
               </div>
@@ -319,7 +319,7 @@ export default function LoginForm() {
                 <span className="h-1.5 w-1.5 rounded-full bg-primary"></span>
                 ข้อมูลสิทธิ์ทดลองเข้าใช้งาน (Demo Account)
               </p>
-              <div className="grid grid-cols-2 gap-1 font-mono text-[11px] pt-1">
+              <div className="grid grid-cols-2 gap-1 font-mono text-xs pt-1">
                 <div>User: <span className="text-primary font-bold">admin</span></div>
                 <div>Pass: <span className="text-primary font-bold">admin1234</span></div>
               </div>

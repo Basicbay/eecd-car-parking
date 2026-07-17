@@ -22,7 +22,9 @@ import {
   FileText,
   Image as ImageIcon,
   X,
-  ExternalLink
+  ExternalLink,
+  Copy,
+  Check
 } from "lucide-react"
 
 interface Vehicle {
@@ -58,6 +60,13 @@ export default function VehiclesManagement() {
   const [vehicles, setVehicles] = useState<Vehicle[]>(INITIAL_VEHICLES)
   const [previewImage, setPreviewImage] = useState<{ url: string; plate: string } | null>(null)
   const [now, setNow] = useState<number>(0)
+  const [copiedText, setCopiedText] = useState<string | null>(null)
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedText(text)
+    setTimeout(() => setCopiedText(null), 2000)
+  }
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -267,7 +276,7 @@ export default function VehiclesManagement() {
           <form onSubmit={handleCheckIn} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold text-muted-foreground uppercase">เลขทะเบียนรถ</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase">เลขทะเบียนรถ</label>
                 <Input
                   type="text"
                   placeholder="เช่น 3มง 9999"
@@ -279,7 +288,7 @@ export default function VehiclesManagement() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold text-muted-foreground uppercase">จังหวัด</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase">จังหวัด</label>
                 <select
                   value={newProvince}
                   onChange={(e) => setNewProvince(e.target.value)}
@@ -294,7 +303,7 @@ export default function VehiclesManagement() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold text-muted-foreground uppercase">ช่องจอด</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase">ช่องจอด</label>
                 <select
                   value={newSlot}
                   onChange={(e) => setNewSlot(e.target.value)}
@@ -341,7 +350,7 @@ export default function VehiclesManagement() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-[#22262F] text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-black/20">
+                <tr className="border-b border-[#22262F] text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-black/20">
                   <th className="py-3.5 px-4 w-[60px] text-center">รูปภาพ</th>
                   <th className="py-3.5 px-4">ทะเบียนรถ</th>
                   <th className="py-3.5 px-4">จังหวัด</th>
@@ -381,7 +390,22 @@ export default function VehiclesManagement() {
                           </div>
                         )}
                       </td>
-                      <td className="py-3 px-4 font-bold text-white">{v.plate}</td>
+                      <td className="py-3 px-4 font-bold text-white">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span>{v.plate}</span>
+                          <button
+                            onClick={() => handleCopy(v.plate)}
+                            className="p-1 rounded hover:bg-[#1C2028] text-muted-foreground hover:text-white transition-colors cursor-pointer"
+                            title="คัดลอกทะเบียนรถ"
+                          >
+                            {copiedText === v.plate ? (
+                              <Check className="size-3.5 text-green-400" />
+                            ) : (
+                              <Copy className="size-3.5" />
+                            )}
+                          </button>
+                        </span>
+                      </td>
                       <td className="py-3 px-4 text-muted-foreground">{v.province}</td>
                       <td className="py-3 px-4 font-mono text-primary font-semibold">
                         <span className="flex items-center gap-1">
@@ -406,19 +430,19 @@ export default function VehiclesManagement() {
                       </td>
                       <td className="py-3 px-4">
                         {v.status === "Parked" && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-primary/10 border border-primary/20 text-primary px-2.5 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold bg-primary/10 border border-primary/20 text-primary px-2.5 py-0.5 rounded-full">
                             <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
                             กำลังจอด
                           </span>
                         )}
                         {v.status === "Paid" && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-green-500/10 border border-green-500/20 text-green-400 px-2.5 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold bg-green-500/10 border border-green-500/20 text-green-400 px-2.5 py-0.5 rounded-full">
                             <CheckCircle className="size-3" />
                             ชำระเงินแล้ว
                           </span>
                         )}
                         {v.status === "Exited" && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-[#22262F] text-muted-foreground px-2.5 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold bg-[#22262F] text-muted-foreground px-2.5 py-0.5 rounded-full">
                             <LogOut className="size-3" />
                             ออกแล้ว
                           </span>
@@ -426,16 +450,6 @@ export default function VehiclesManagement() {
                       </td>
                       <td className="py-3 px-4 text-right">
                         <div className="flex justify-end items-center gap-1.5">
-                          <a
-                            href={`/pay/${v.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1 rounded bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-400 text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1"
-                            title="เปิดลิงก์ชำระเงินฝั่งลูกค้า"
-                          >
-                            <ExternalLink className="size-3.5" />
-                            ลิงก์จ่ายเงิน
-                          </a>
                           <button
                             onClick={() => {
                               setSelectedVehicleForTicket({
@@ -444,16 +458,26 @@ export default function VehiclesManagement() {
                               })
                               setIsTicketOpen(true)
                             }}
-                            className="p-1 rounded bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1"
+                            className="p-1 rounded bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1"
                             title="ดูบัตรจอดรถ / Wi-Fi"
                           >
                             <FileText className="size-3.5" />
                             บัตรจอด
                           </button>
+                          <a
+                            href={`/pay/${v.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1 rounded bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-400 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1"
+                            title="เปิดลิงก์ชำระเงินฝั่งลูกค้า"
+                          >
+                            <ExternalLink className="size-3.5" />
+                            ลิงก์จ่ายเงิน
+                          </a>
                           {v.status === "Parked" && (
                             <button
                               onClick={() => handlePay(v.id)}
-                              className="px-2.5 py-1 rounded bg-[#EAB308]/10 hover:bg-[#EAB308]/20 border border-[#EAB308]/20 text-[#EAB308] text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                              className="px-2.5 py-1 rounded bg-[#EAB308]/10 hover:bg-[#EAB308]/20 border border-[#EAB308]/20 text-[#EAB308] text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
                             >
                               <CreditCard className="size-3" />
                               รับชำระเงิน
@@ -462,7 +486,7 @@ export default function VehiclesManagement() {
                           {v.status === "Paid" && (
                             <button
                               onClick={() => handleExit(v.id)}
-                              className="px-2.5 py-1 rounded bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-400 text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                              className="px-2.5 py-1 rounded bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-400 text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
                             >
                               <LogOut className="size-3" />
                               ยืนยันออก
@@ -482,7 +506,7 @@ export default function VehiclesManagement() {
               <Car className="size-10 text-[#22262F] stroke-[1.5]" />
               <div className="space-y-1">
                 <p className="text-xs font-semibold text-white">ไม่พบข้อมูลรถยนต์</p>
-                <p className="text-[10px] text-muted-foreground">ลองเปลี่ยนคำค้นหา หรือกรองตามสถานะอื่น</p>
+                <p className="text-xs text-muted-foreground">ลองเปลี่ยนคำค้นหา หรือกรองตามสถานะอื่น</p>
               </div>
             </div>
           )}
@@ -499,7 +523,7 @@ export default function VehiclesManagement() {
                   <span className="h-2.5 w-2.5 rounded-full bg-primary" />
                   โซนจอดรถ {zone} (Parking Zone {zone})
                 </h4>
-                <span className="text-[10px] font-semibold text-muted-foreground">
+                <span className="text-xs font-semibold text-muted-foreground">
                   กำลังใช้งาน {vehicles.filter(v => v.slot.startsWith(zone) && v.status !== "Exited").length} / {slotNumbers.length}
                 </span>
               </div>
@@ -521,35 +545,39 @@ export default function VehiclesManagement() {
                       }`}
                     >
                       {/* Slot code label */}
-                      <span className="text-[10px] font-bold text-muted-foreground group-hover:text-white transition-colors">
+                      <span className="text-xs font-bold text-muted-foreground group-hover:text-white transition-colors">
                         {code}
                       </span>
 
                       {occupant ? (
                         <div className="space-y-1 my-1">
                           <p className="text-xs font-bold text-white tracking-wide">{occupant.plate}</p>
-                          <p className="text-[9px] text-muted-foreground truncate max-w-[80px]">{occupant.province}</p>
+                          <p className="text-xs text-muted-foreground truncate max-w-[80px]">{occupant.province}</p>
                         </div>
                       ) : (
-                        <span className="text-[10px] text-green-400 font-semibold my-1">ว่าง</span>
+                        <span className="text-xs text-green-400 font-semibold my-1">ว่าง</span>
                       )}
 
                       {/* Small action tag */}
                       {occupant && (
                         <div className="absolute inset-0 bg-[#090A0C]/90 flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2">
-                          <span className="text-[9px] text-white font-semibold">{occupant.plate}</span>
-                          <span className="text-[8px] text-primary font-mono">฿{occupant.fee}</span>
+                          <span className="text-xs text-white font-semibold inline-flex items-center gap-1">
+                            <span>{occupant.plate}</span>
+                            <button
+                              onClick={() => handleCopy(occupant.plate)}
+                              className="p-0.5 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors cursor-pointer"
+                              title="คัดลอกทะเบียนรถ"
+                            >
+                              {copiedText === occupant.plate ? (
+                                <Check className="size-3 text-green-400" />
+                              ) : (
+                                <Copy className="size-3" />
+                              )}
+                            </button>
+                          </span>
+                          <span className="text-xs text-primary font-mono">฿{occupant.fee}</span>
                           
-                           <a
-                            href={`/pay/${occupant.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full text-[8px] py-0.5 rounded bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/30 text-indigo-400 font-bold cursor-pointer text-center block"
-                            title="ลิงก์ชำระเงินสำหรับลูกค้า"
-                          >
-                            ลิงก์จ่ายเงิน
-                          </a>
-                          <button
+                           <button
                             onClick={() => {
                               setSelectedVehicleForTicket({
                                 ...occupant,
@@ -557,22 +585,31 @@ export default function VehiclesManagement() {
                               })
                               setIsTicketOpen(true)
                             }}
-                            className="w-full text-[8px] py-0.5 rounded bg-blue-500 hover:bg-blue-600 text-white font-bold cursor-pointer"
+                            className="w-full text-xs py-0.5 rounded bg-blue-500 hover:bg-blue-600 text-white font-bold cursor-pointer"
                           >
                             ดูบัตรจอด
                           </button>
+                           <a
+                            href={`/pay/${occupant.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full text-xs py-0.5 rounded bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/30 text-indigo-400 font-bold cursor-pointer text-center block"
+                            title="ลิงก์ชำระเงินสำหรับลูกค้า"
+                          >
+                            ลิงก์จ่ายเงิน
+                          </a>
                           
                           {occupant.status === "Parked" ? (
                             <button
                               onClick={() => handlePay(occupant.id)}
-                              className="w-full text-[8px] py-0.5 rounded bg-primary text-primary-foreground font-bold cursor-pointer"
+                              className="w-full text-xs py-0.5 rounded bg-primary text-primary-foreground font-bold cursor-pointer"
                             >
                               จ่ายเงิน
                             </button>
                           ) : (
                             <button
                               onClick={() => handleExit(occupant.id)}
-                              className="w-full text-[8px] py-0.5 rounded bg-green-500 text-white font-bold cursor-pointer"
+                              className="w-full text-xs py-0.5 rounded bg-green-500 text-white font-bold cursor-pointer"
                             >
                               ปล่อยรถออก
                             </button>

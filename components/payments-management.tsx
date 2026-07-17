@@ -18,7 +18,9 @@ import {
   ArrowUpRight,
   RefreshCw,
   QrCode,
-  FileText
+  FileText,
+  Copy,
+  Check
 } from "lucide-react"
 
 interface Transaction {
@@ -116,6 +118,13 @@ export default function PaymentsManagement() {
 
   const [search, setSearch] = useState("")
   const [methodFilter, setMethodFilter] = useState<"All" | "PromptPay" | "Rabbit LINE Pay" | "Cash">("All")
+  const [copiedText, setCopiedText] = useState<string | null>(null)
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedText(text)
+    setTimeout(() => setCopiedText(null), 2000)
+  }
 
   // Ticket Modal states
   const [selectedVehicleForTicket, setSelectedVehicleForTicket] = useState<{
@@ -168,7 +177,7 @@ export default function PaymentsManagement() {
           <div className="space-y-1">
             <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">รายได้ชำระสำเร็จรวม</span>
             <h3 className="text-3xl font-extrabold text-white">฿{totalRevenue}</h3>
-            <p className="text-[10px] text-muted-foreground">ผ่านสแกน QR Code และเงินสด</p>
+            <p className="text-xs text-muted-foreground">ผ่านสแกน QR Code และเงินสด</p>
           </div>
           <div className="h-10 w-10 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400">
             <DollarSign className="size-5" />
@@ -179,7 +188,7 @@ export default function PaymentsManagement() {
           <div className="space-y-1">
             <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">รายการชำระสำเร็จ</span>
             <h3 className="text-3xl font-extrabold text-white">{successTransactions.length} รายการ</h3>
-            <p className="text-[10px] text-muted-foreground">อัตราสำเร็จ {Math.round((successTransactions.length / transactions.length) * 100)}%</p>
+            <p className="text-xs text-muted-foreground">อัตราสำเร็จ {Math.round((successTransactions.length / transactions.length) * 100)}%</p>
           </div>
           <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
             <Receipt className="size-5" />
@@ -190,7 +199,7 @@ export default function PaymentsManagement() {
           <div className="space-y-1">
             <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">ค่าจอดรถเฉลี่ย/คัน</span>
             <h3 className="text-3xl font-extrabold text-white">฿{averageBill}</h3>
-            <p className="text-[10px] text-muted-foreground">ประมาณการเวลาจอด 3-4 ชั่วโมง</p>
+            <p className="text-xs text-muted-foreground">ประมาณการเวลาจอด 3-4 ชั่วโมง</p>
           </div>
           <div className="h-10 w-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
             <ArrowUpRight className="size-5" />
@@ -242,7 +251,7 @@ export default function PaymentsManagement() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-[#22262F] text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-black/20">
+              <tr className="border-b border-[#22262F] text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-black/20">
                 <th className="py-3.5 px-4">เลขทำรายการ (TXN ID)</th>
                 <th className="py-3.5 px-4">ทะเบียนรถ</th>
                 <th className="py-3.5 px-4">จังหวัด</th>
@@ -260,7 +269,22 @@ export default function PaymentsManagement() {
                   <td className="py-3 px-4 font-mono font-bold text-white tracking-wider">
                     {t.id}
                   </td>
-                  <td className="py-3 px-4 font-bold text-white">{t.plate}</td>
+                  <td className="py-3 px-4 font-bold text-white">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span>{t.plate}</span>
+                      <button
+                        onClick={() => handleCopy(t.plate)}
+                        className="p-1 rounded hover:bg-[#1C2028] text-muted-foreground hover:text-white transition-colors cursor-pointer"
+                        title="คัดลอกทะเบียนรถ"
+                      >
+                        {copiedText === t.plate ? (
+                          <Check className="size-3.5 text-green-400" />
+                        ) : (
+                          <Copy className="size-3.5" />
+                        )}
+                      </button>
+                    </span>
+                  </td>
                   <td className="py-3 px-4 text-muted-foreground">{t.province}</td>
                   <td className="py-3 px-4 text-muted-foreground">
                     {t.checkInTime.toLocaleTimeString("th-TH", { hour: '2-digit', minute: '2-digit' })}
@@ -273,18 +297,18 @@ export default function PaymentsManagement() {
                       {t.method === "PromptPay" && <QrCode className="size-3.5 text-blue-400" />}
                       {t.method === "Rabbit LINE Pay" && <CreditCard className="size-3.5 text-primary" />}
                       {t.method === "Cash" && <DollarSign className="size-3.5 text-green-400" />}
-                      <span className="text-[10px] text-muted-foreground font-medium">{t.method}</span>
+                      <span className="text-xs text-muted-foreground font-medium">{t.method}</span>
                     </span>
                   </td>
                   <td className="py-3 px-4 font-bold text-white">฿{t.amount}</td>
                   <td className="py-3 px-4">
                     {t.status === "Success" ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-green-500/10 border border-green-500/20 text-green-400 px-2.5 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold bg-green-500/10 border border-green-500/20 text-green-400 px-2.5 py-0.5 rounded-full">
                         <CheckCircle className="size-3" />
                         สำเร็จ
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-red-500/10 border border-red-500/20 text-red-400 px-2.5 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold bg-red-500/10 border border-red-500/20 text-red-400 px-2.5 py-0.5 rounded-full">
                         <XCircle className="size-3" />
                         ล้มเหลว
                       </span>
@@ -294,14 +318,14 @@ export default function PaymentsManagement() {
                     {t.status === "Success" ? (
                       <button
                         onClick={() => handleOpenTicket(t)}
-                        className="p-1 rounded bg-[#121418] hover:bg-muted border border-border text-muted-foreground hover:text-white transition-all cursor-pointer inline-flex items-center justify-center gap-1 text-[10px] font-medium px-2 py-1"
+                        className="p-1 rounded bg-[#121418] hover:bg-muted border border-border text-muted-foreground hover:text-white transition-all cursor-pointer inline-flex items-center justify-center gap-1 text-xs font-medium px-2 py-1"
                         title="ดูใบเสร็จ / บัตรจอดรถ"
                       >
                         <Printer className="size-3.5" />
-                        ตั๋ว/ใบเสร็จ
+                        ใบเสร็จ
                       </button>
                     ) : (
-                      <span className="text-[10px] text-muted-foreground italic px-2">-</span>
+                      <span className="text-xs text-muted-foreground italic px-2">-</span>
                     )}
                   </td>
                 </tr>
@@ -315,7 +339,7 @@ export default function PaymentsManagement() {
             <Receipt className="size-10 text-[#22262F] stroke-[1.5]" />
             <div className="space-y-1">
               <p className="text-xs font-semibold text-white">ไม่พบประวัติชำระเงิน</p>
-              <p className="text-[10px] text-muted-foreground">ลองเปลี่ยนแปลงคำค้นหา หรือกรองด้วยช่องทางอื่น</p>
+              <p className="text-xs text-muted-foreground">ลองเปลี่ยนแปลงคำค้นหา หรือกรองด้วยช่องทางอื่น</p>
             </div>
           </div>
         )}

@@ -4,6 +4,7 @@ import * as React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { AlertDialog } from "@/components/ui/alert-dialog"
 import {
   Wifi,
   Search,
@@ -86,6 +87,10 @@ export default function VouchersManagement() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const [batchHistory, setBatchHistory] = useState<string[] | null>(null)
 
+  // Deletion state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [voucherToDelete, setVoucherToDelete] = useState<string | null>(null)
+
   // Generate Vouchers
   const handleGenerate = () => {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -119,8 +124,17 @@ export default function VouchersManagement() {
     setBatchHistory(generatedCodes)
   }
 
-  const handleDelete = (id: string) => {
-    setVouchers(vouchers.filter(v => v.id !== id))
+  const handleTriggerDelete = (id: string) => {
+    setVoucherToDelete(id)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (voucherToDelete) {
+      setVouchers(vouchers.filter(v => v.id !== voucherToDelete))
+      setIsDeleteDialogOpen(false)
+      setVoucherToDelete(null)
+    }
   }
 
   const handleCopy = (code: string) => {
@@ -143,7 +157,7 @@ export default function VouchersManagement() {
           <div className="space-y-1">
             <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">คูปองที่เปิดใช้งานอยู่</span>
             <h3 className="text-3xl font-extrabold text-white">{vouchers.filter(v => v.status === "Active").length} รหัส</h3>
-            <p className="text-[10px] text-muted-foreground">พร้อมเชื่อมต่ออินเทอร์เน็ต</p>
+            <p className="text-xs text-muted-foreground">พร้อมเชื่อมต่ออินเทอร์เน็ต</p>
           </div>
           <div className="h-10 w-10 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400">
             <Wifi className="size-5" />
@@ -154,7 +168,7 @@ export default function VouchersManagement() {
           <div className="space-y-1">
             <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">อุปกรณ์ที่ใช้งานแล้ว</span>
             <h3 className="text-3xl font-extrabold text-white">{vouchers.filter(v => v.status === "Used").length} ครั้ง</h3>
-            <p className="text-[10px] text-muted-foreground">สแกนเปิดใช้งาน Wi-Fi แล้ว</p>
+            <p className="text-xs text-muted-foreground">สแกนเปิดใช้งาน Wi-Fi แล้ว</p>
           </div>
           <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
             <Server className="size-5" />
@@ -165,7 +179,7 @@ export default function VouchersManagement() {
           <div className="space-y-1">
             <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">คูปองทั้งหมดในระบบ</span>
             <h3 className="text-3xl font-extrabold text-white">{vouchers.length} รหัส</h3>
-            <p className="text-[10px] text-muted-foreground">ประวัติรวมตั้งแต่เริ่มต้น</p>
+            <p className="text-xs text-muted-foreground">ประวัติรวมตั้งแต่เริ่มต้น</p>
           </div>
           <div className="h-10 w-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
             <Zap className="size-5" />
@@ -187,7 +201,7 @@ export default function VouchersManagement() {
             <div className="space-y-3.5">
               {/* Duration select */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold text-muted-foreground uppercase">ระยะเวลาสิทธิ์ใช้งาน</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase">ระยะเวลาสิทธิ์ใช้งาน</label>
                 <select
                   value={duration}
                   onChange={(e) => setDuration(e.target.value)}
@@ -202,7 +216,7 @@ export default function VouchersManagement() {
 
               {/* Speed limit selection */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold text-muted-foreground uppercase">ความเร็วอินเทอร์เน็ต (Speed Limit)</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase">ความเร็วอินเทอร์เน็ต (Speed Limit)</label>
                 <select
                   value={speedLimit}
                   onChange={(e) => setSpeedLimit(e.target.value)}
@@ -217,7 +231,7 @@ export default function VouchersManagement() {
 
               {/* Quantity select */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold text-muted-foreground uppercase">จำนวนรหัสที่ต้องการสุ่ม</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase">จำนวนรหัสที่ต้องการสุ่ม</label>
                 <div className="flex gap-2">
                   {[1, 5, 10].map((num) => (
                     <button
@@ -257,13 +271,13 @@ export default function VouchersManagement() {
             {batchHistory && (
               <div className="pt-3 border-t border-[#22262F] space-y-2.5 animate-fadeIn">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-bold text-green-400 flex items-center gap-1">
+                  <span className="text-xs font-bold text-green-400 flex items-center gap-1">
                     <Sparkles className="size-3" />
                     รหัสที่ถูกสร้างล่าสุด ({batchHistory.length} รหัส)
                   </span>
                   <button
                     onClick={() => setBatchHistory(null)}
-                    className="text-[9px] text-muted-foreground hover:text-white"
+                    className="text-xs text-muted-foreground hover:text-white"
                   >
                     ล้างการแสดงผล
                   </button>
@@ -277,7 +291,7 @@ export default function VouchersManagement() {
                       <span className="font-mono text-xs font-bold text-white">{code}</span>
                       <button
                         onClick={() => handleCopy(code)}
-                        className="text-[10px] text-primary hover:underline font-semibold flex items-center gap-0.5 cursor-pointer"
+                        className="text-xs text-primary hover:underline font-semibold flex items-center gap-0.5 cursor-pointer"
                       >
                         {copiedCode === code ? (
                           <>
@@ -345,7 +359,7 @@ export default function VouchersManagement() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-[#22262F] text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-black/20">
+                  <tr className="border-b border-[#22262F] text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-black/20">
                     <th className="py-3 px-4">รหัสคูปอง Wi-Fi</th>
                     <th className="py-3 px-4">ระยะเวลา</th>
                     <th className="py-3 px-4">ความเร็ว (Speed)</th>
@@ -353,18 +367,31 @@ export default function VouchersManagement() {
                     <th className="py-3 px-4">เวลาหมดอายุ</th>
                     <th className="py-3 px-4">รายละเอียดผู้ใช้งาน</th>
                     <th className="py-3 px-4">สถานะ</th>
-                    <th className="py-3 px-4 text-right">จัดการ</th>
+                    <th className="py-3 px-4 text-right">ดำเนินการ</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#1D212A]">
                   {filteredVouchers.map((v) => (
                     <tr key={v.id} className="hover:bg-[#121418]/45 transition-colors">
                       <td className="py-3 px-4 font-mono font-bold text-white tracking-wider">
-                        {v.code}
+                        <span className="inline-flex items-center gap-1.5">
+                          <span>{v.code}</span>
+                          <button
+                            onClick={() => handleCopy(v.code)}
+                            className="p-1 rounded hover:bg-[#1C2028] text-muted-foreground hover:text-white transition-colors cursor-pointer"
+                            title="คัดลอกรหัสคูปอง"
+                          >
+                            {copiedCode === v.code ? (
+                              <Check className="size-3.5 text-green-400" />
+                            ) : (
+                              <Copy className="size-3.5" />
+                            )}
+                          </button>
+                        </span>
                       </td>
                       <td className="py-3 px-4 text-muted-foreground">{v.duration}</td>
                       <td className="py-3 px-4">
-                        <span className="inline-flex items-center gap-1 text-[10px] font-mono text-primary bg-primary/5 px-2 py-0.5 rounded border border-primary/10">
+                        <span className="inline-flex items-center gap-1 text-xs font-mono text-primary bg-primary/5 px-2 py-0.5 rounded border border-primary/10">
                           {v.speedLimit}
                         </span>
                       </td>
@@ -379,45 +406,32 @@ export default function VouchersManagement() {
                       </td>
                       <td className="py-3 px-4">
                         {v.status === "Active" && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
                             <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
                             เปิดใช้งาน
                           </span>
                         )}
                         {v.status === "Used" && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-primary/10 border border-primary/20 text-primary px-2 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold bg-primary/10 border border-primary/20 text-primary px-2 py-0.5 rounded-full">
                             <CheckCircle2 className="size-3" />
                             ใช้งานแล้ว
                           </span>
                         )}
                         {v.status === "Expired" && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-red-500/10 border border-red-500/20 text-red-400 px-2 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold bg-red-500/10 border border-red-500/20 text-red-400 px-2 py-0.5 rounded-full">
                             <XCircle className="size-3" />
                             หมดอายุ
                           </span>
                         )}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <div className="flex justify-end gap-1.5">
-                          <button
-                            onClick={() => handleCopy(v.code)}
-                            className="p-1 rounded bg-[#121418] hover:bg-muted border border-border text-muted-foreground hover:text-white transition-all cursor-pointer"
-                            title="คัดลอกรหัสผ่าน"
-                          >
-                            {copiedCode === v.code ? (
-                              <Check className="size-3 text-green-400" />
-                            ) : (
-                              <Copy className="size-3" />
-                            )}
-                          </button>
-                          <button
-                            onClick={() => handleDelete(v.id)}
-                            className="p-1 rounded bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 text-destructive transition-all cursor-pointer"
-                            title="ลบรหัส"
-                          >
-                            <Trash2 className="size-3" />
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => handleTriggerDelete(v.id)}
+                          className="p-1 rounded bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 text-destructive transition-all cursor-pointer inline-flex items-center justify-center"
+                          title="ลบรหัส"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -430,13 +444,20 @@ export default function VouchersManagement() {
                 <Wifi className="size-10 text-[#22262F] stroke-[1.5]" />
                 <div className="space-y-1">
                   <p className="text-xs font-semibold text-white">ไม่พบรหัส Wi-Fi Voucher</p>
-                  <p className="text-[10px] text-muted-foreground">ลองเปลี่ยนคำค้นหา หรือฟิลเตอร์เพื่อค้นหาใหม่</p>
+                  <p className="text-xs text-muted-foreground">ลองเปลี่ยนคำค้นหา หรือฟิลเตอร์เพื่อค้นหาใหม่</p>
                 </div>
               </div>
             )}
           </div>
         </div>
       </div>
+      <AlertDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="ยืนยันการลบรหัสคูปอง Wi-Fi"
+        description="คุณแน่ใจหรือไม่ว่าต้องการลบรหัสคูปอง Wi-Fi นี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้ และรหัสคูปองนี้จะถูกลบออกจากระบบอย่างถาวร"
+      />
     </div>
   )
 }

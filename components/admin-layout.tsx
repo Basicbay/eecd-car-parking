@@ -39,19 +39,17 @@ export default function AdminLayout({
   useEffect(() => {
     const updateTime = () => {
       const date = new Date();
-      setCurrentTime(
-        date.toLocaleTimeString("th-TH", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        }) +
-          " | " +
-          date.toLocaleDateString("th-TH", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          }),
-      );
+      const timeStr = date.toLocaleTimeString("th-TH", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+      const dateStr = date.toLocaleDateString("th-TH", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+      setCurrentTime(`วันที่ ${dateStr} เวลา ${timeStr}`);
     };
     updateTime();
     const timer = setInterval(updateTime, 1000);
@@ -147,7 +145,7 @@ export default function AdminLayout({
                       PARKING
                     </span>
                   </h1>
-                  <p className="text-[10px] mt-0.5 text-muted-foreground uppercase tracking-widest">
+                  <p className="text-xs mt-0.5 text-muted-foreground uppercase tracking-widest">
                     Admin
                   </p>
                 </div>
@@ -164,7 +162,7 @@ export default function AdminLayout({
             <nav className="space-y-4">
               {/* Section: ผู้ดูแลระบบ */}
               <div className="space-y-1.5">
-                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
                   ผู้ดูแลระบบ
                 </div>
                 {menuItems
@@ -197,7 +195,7 @@ export default function AdminLayout({
 
               {/* Section: ลูกค้า */}
               <div className="space-y-1.5">
-                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
                   ลูกค้า
                 </div>
                 {menuItems
@@ -242,7 +240,7 @@ export default function AdminLayout({
                 <p className="text-xs font-semibold text-white truncate">
                   {adminName || "Admin User"}
                 </p>
-                <p className="text-[10px] text-muted-foreground truncate">
+                <p className="text-xs text-muted-foreground truncate">
                   {adminEmail || "admin@carpark.com"}
                 </p>
               </div>
@@ -286,7 +284,7 @@ export default function AdminLayout({
                   PARKING
                 </span>
               </h1>
-              <p className="text-[10px] mt-0.5 text-muted-foreground uppercase tracking-widest">
+              <p className="text-xs mt-0.5 text-muted-foreground uppercase tracking-widest">
                 Admin Dashboard
               </p>
             </div>
@@ -296,7 +294,7 @@ export default function AdminLayout({
           <nav className="space-y-4">
             {/* Section: ผู้ดูแลระบบ */}
             <div className="space-y-1.5">
-              <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
                 ผู้ดูแลระบบ
               </div>
               {menuItems
@@ -328,7 +326,7 @@ export default function AdminLayout({
 
             {/* Section: ลูกค้า */}
             <div className="space-y-1.5">
-              <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
                 ลูกค้า
               </div>
               {menuItems
@@ -372,7 +370,7 @@ export default function AdminLayout({
               <p className="text-xs font-semibold text-white truncate">
                 {adminName || "Admin User"}
               </p>
-              <p className="text-[10px] text-muted-foreground truncate">
+              <p className="text-xs text-muted-foreground truncate">
                 {adminEmail || "admin@carpark.com"}
               </p>
             </div>
@@ -397,7 +395,7 @@ export default function AdminLayout({
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col overflow-y-auto bg-[#090A0C]">
         {/* Top Header Bar */}
-        <header className="h-16 border-b border-[#22262F] bg-[#0B0C0E]/80 backdrop-blur-md p-4 sm:px-6 flex items-center justify-between sticky top-0 z-20">
+        <header className="h-20 border-b border-[#22262F] bg-[#0B0C0E]/80 backdrop-blur-md p-4 sm:px-6 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-3">
             {/* Hamburger Button for Mobile */}
             <button
@@ -412,10 +410,10 @@ export default function AdminLayout({
               <ParkingSquare className="size-5" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-md font-bold text-white tracking-tight">
+              <h2 className="text-xl sm:text-md font-bold text-white tracking-tight">
                 {getHeaderTitle()}
               </h2>
-              <p className="text-[10px] text-muted-foreground hidden sm:block">
+              <p className="text-xs text-muted-foreground hidden sm:block">
                 ดูข้อมูลเรียลไทม์ จัดการรถเข้าออก และคูปองอินเทอร์เน็ต
               </p>
             </div>
@@ -424,7 +422,7 @@ export default function AdminLayout({
           <div className="flex items-center gap-4">
             {/* Live Timer Widget */}
             <div className="hidden md:flex items-center gap-2 bg-[#121418] border border-[#22262F] px-3.5 py-1.5 rounded-lg text-xs text-muted-foreground font-mono">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
+              <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
               {currentTime || "กำลังโหลด..."}
             </div>
 
@@ -442,7 +440,7 @@ export default function AdminLayout({
         </header>
 
         {/* Dynamic page content */}
-        <div className="p-4 sm:p-6 space-y-6 max-w-[1600px] w-full mx-auto">
+        <div className="p-4 sm:p-6 space-y-6 w-full mx-auto">
           {children}
         </div>
       </main>

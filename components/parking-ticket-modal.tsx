@@ -243,7 +243,7 @@ export default function ParkingTicketModal({ isOpen, onClose, vehicle }: Parking
     setDownloading(true)
     setTimeout(() => {
       setDownloading(false)
-      alert(`บันทึกตั๋วเช็คอินรถยนต์สำเร็จเป็นไฟล์ ${ticketId}.png (จำลอง)`)
+      alert(`บันทึกใบเสร็จเช็คอินรถยนต์สำเร็จเป็นไฟล์ ${ticketId}.png (จำลอง)`)
     }, 1500)
   }
 
@@ -302,19 +302,19 @@ export default function ParkingTicketModal({ isOpen, onClose, vehicle }: Parking
             <div className="text-center space-y-4 pt-2">
               <div>
                 <h4 className="font-extrabold text-sm tracking-tight text-black">EECD SMART PARKING</h4>
-                <p className="text-[9px] text-zinc-500 uppercase tracking-widest mt-0.5">Automated Receipt System</p>
+                <p className="text-xs text-zinc-500 uppercase tracking-widest mt-0.5">Automated Receipt System</p>
               </div>
 
               {/* Barcode representation */}
               <div className="space-y-1">
                 <MockBarcode value={ticketId} />
-                <p className="text-[8px] font-bold text-zinc-600 tracking-widest">{ticketId}</p>
+                <p className="text-xs font-bold text-zinc-600 tracking-widest">{ticketId}</p>
               </div>
 
               <div className="border-t border-dashed border-zinc-300 my-2"></div>
 
               {/* Vehicle parameters */}
-              <div className="space-y-1.5 text-left text-[11px] text-zinc-800">
+              <div className="space-y-1.5 text-left text-xs text-zinc-800">
                 <div className="flex justify-between">
                   <span>ทะเบียนรถ:</span>
                   <span className="font-bold text-black">{vehicle.plate}</span>
@@ -339,14 +339,14 @@ export default function ParkingTicketModal({ isOpen, onClose, vehicle }: Parking
 
               {/* QR Code section */}
               <div className="space-y-2">
-                <p className="text-[10px] font-bold text-black flex items-center gap-1 justify-center">
+                <p className="text-xs font-bold text-black flex items-center gap-1 justify-center">
                   <QrCode className="size-3.5 text-zinc-800" />
                   สแกนชำระค่าบริการจอดรถ
                 </p>
                 <div className="p-2 border border-zinc-200 inline-block bg-white rounded">
                   <MockQRCode value={qrCodePayload} />
                 </div>
-                <p className="text-[8px] text-zinc-500 max-w-[200px] mx-auto leading-relaxed">
+                <p className="text-xs text-zinc-500 max-w-[200px] mx-auto leading-relaxed">
                   สแกนชำระเงินก่อนนำรถออก ระบบเปิดประตูอัตโนมัติเมื่อตรวจสอบสถานะชำระเงินเรียบร้อย
                 </p>
               </div>
@@ -355,14 +355,14 @@ export default function ParkingTicketModal({ isOpen, onClose, vehicle }: Parking
 
               {/* WiFi voucher section */}
               <div className="space-y-2 bg-zinc-50 p-2.5 rounded border border-zinc-100">
-                <p className="text-[9px] font-bold text-zinc-700 flex items-center gap-1 justify-center uppercase tracking-wide">
+                <p className="text-xs font-bold text-zinc-700 flex items-center gap-1 justify-center uppercase tracking-wide">
                   <Wifi className="size-3.5 text-zinc-800 animate-pulse" />
                   Free WiFi Credentials
                 </p>
                 <div className="bg-zinc-200 py-1.5 px-3 rounded font-bold text-xs tracking-wider text-black select-text">
                   {wifiCode}
                 </div>
-                <p className="text-[8px] text-zinc-500 leading-normal">
+                <p className="text-xs text-zinc-500 leading-normal">
                   SSID: <b>EECD-FreeWiFi</b><br />
                   ใช้สิทธิ์อินเทอร์เน็ตได้ฟรีในพื้นที่
                 </p>
@@ -371,7 +371,7 @@ export default function ParkingTicketModal({ isOpen, onClose, vehicle }: Parking
               <div className="border-t border-dashed border-zinc-300 my-2"></div>
 
               {/* Footer details */}
-              <div className="text-[8px] text-zinc-400 space-y-1">
+              <div className="text-xs text-zinc-400 space-y-1">
                 <p>ขอบคุณที่ใช้บริการลานจอดรถ EECD</p>
                 <p>สิทธิ์การจอดคิดอัตราบริการตามที่ระบุในเงื่อนไข</p>
               </div>
