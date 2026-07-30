@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 
 const loginSchema = z.object({
-  username: z.string().min(1, { message: "กรุณากรอกชื่อผู้ใช้งาน" }),
+  email: z.string().email({ message: "กรุณากรอกอีเมลให้ถูกต้อง" }),
   password: z.string().min(1, { message: "กรุณากรอกรหัสผ่าน" }),
 });
 
@@ -46,8 +46,8 @@ export default function LoginForm() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "admin",
-      password: "admin1234",
+      email: "carpark.admin@example.com",
+      password: "ChangeMe123!",
     },
   });
 
@@ -57,7 +57,7 @@ export default function LoginForm() {
 
     try {
       const result = await signIn("credentials", {
-        username: data.username,
+        email: data.email,
         password: data.password,
         redirect: false,
       });
@@ -69,7 +69,7 @@ export default function LoginForm() {
         router.push(callbackUrl);
         router.refresh();
       }
-    } catch (err) {
+    } catch {
       setError("เกิดข้อผิดพลาดในการเชื่อมต่อระบบ กรุณาลองใหม่อีกครั้ง");
       setIsLoading(false);
     }
@@ -249,25 +249,25 @@ export default function LoginForm() {
               {/* Username field */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-muted-foreground tracking-wide uppercase">
-                  ชื่อผู้ใช้งาน (Username)
+                  อีเมล (Email)
                 </label>
                 <div className="relative group">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-muted-foreground group-focus-within:text-primary transition-colors duration-200">
                     <User className="size-4" />
                   </span>
                   <Input
-                    {...register("username")}
-                    type="text"
-                    placeholder="ใส่ชื่อผู้ใช้งานของคุณ"
+                    {...register("email")}
+                    type="email"
+                    placeholder="carpark.admin@example.com"
                     className="pl-10"
-                    autoComplete="username"
+                    autoComplete="email"
                     disabled={isLoading}
                   />
                 </div>
-                {errors.username && (
+                {errors.email && (
                   <p className="text-xs text-destructive mt-1 flex items-center gap-1">
                     <AlertCircle className="size-3" />
-                    {errors.username.message}
+                    {errors.email.message}
                   </p>
                 )}
               </div>

@@ -1,0 +1,112 @@
+import { auth } from "@/auth"
+import { NextRequest, NextResponse } from "next/server"
+
+interface ApiSession {
+  accessToken?: string
+}
+
+interface RouteContext {
+  params: Promise<{
+    id: string
+  }>
+}
+
+const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "")
+
+const getUserUrl = (id: string) => {
+  const apiBaseUrl = trimTrailingSlash(
+    process.env.AUTH_API_BASE_URL ?? "http://localhost:3000/api",
+  )
+
+  return `${apiBaseUrl}/users/${id}`
+}
+
+const getClientIpAddress = (request: NextRequest) => {
+  return (
+    request.headers.get("x-forwarded-for") ??
+    request.headers.get("x-real-ip") ??
+    "unknown"
+  )
+}
+
+const getAuthHeaders = async (request: NextRequest) => {
+  const session = (await auth()) as ApiSession | null
+
+  if (!session?.accessToken) {
+    return null
+  }
+
+  return {
+    Authorization: `Bearer ${session.accessToken}`,
+    "Content-Type": "application/json",
+    "x-forwarded-for": getClientIpAddress(request),
+  }
+}
+
+const proxyJsonResponse = async (response: Response) => {
+  const payload = await response.json().catch(() => ({}))
+
+  return NextResponse.json(payload, {
+    status: response.status,
+  })
+}
+
+export async function GET(request: NextRequest, context: RouteContext) {
+  const headers = await getAuthHeaders(request)
+
+  if (!headers) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized", data: {}, metadata: {} },
+      { status: 401 },
+    )
+  }
+
+  const { id } = await context.params
+  const response = await fetch(getUserUrl(id), {
+    headers,
+    cache: "no-store",
+  })
+
+  return proxyJsonResponse(response)
+}
+
+export async function PATCH(request: NextRequest, context: RouteContext) {
+  const headers = await getAuthHeaders(request)
+
+  if (!headers) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized", data: {}, metadata: {} },
+      { status: 401 },
+    )
+  }
+
+  const { id } = await context.params
+  const response = await fetch(getUserUrl(id), {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify(await request.json()),
+    cache: "no-store",
+  })
+
+  return proxyJsonResponse(response)
+}
+
+export async function DELETE(request: NextRequest, context: RouteContext) {
+  const headers = await getAuthHeaders(request)
+
+  if (!headers) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized", data: {}, metadata: {} },
+      { status: 401 },
+    )
+  }
+
+  const { id } = await context.params
+  const response = await fetch(getUserUrl(id), {
+    method: "DELETE",
+    headers,
+    cache: "no-store",
+  })
+
+  return proxyJsonResponse(response)
+}

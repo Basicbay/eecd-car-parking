@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -15,23 +15,58 @@ import {
   Search,
   Menu,
   X,
+  ShieldCheck,
+  Users,
+  Activity,
+  KeyRound,
 } from "lucide-react";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  adminEmail?: string | null;
-  adminName?: string | null;
 }
 
-export default function AdminLayout({
-  children,
-  adminEmail,
-  adminName,
-}: AdminLayoutProps) {
+interface SessionUserWithRole {
+  role?: string | null;
+  permissions?: string[];
+}
+
+export default function AdminLayout({ children }: AdminLayoutProps) {
+  const { data: session, status } = useSession();
   const pathname = usePathname();
   const [currentTime, setCurrentTime] = useState<string>("");
   const [isSignOutLoading, setIsSignOutLoading] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const sessionUser = session?.user as
+    | (NonNullable<typeof session>["user"] & SessionUserWithRole)
+    | undefined;
+  const adminName = session?.user?.name;
+  const adminEmail = session?.user?.email;
+  const adminRole = sessionUser?.role;
+  const userPermissions = sessionUser?.permissions ?? [];
+  const hasPermission = (permission?: string) => {
+    if (!permission) {
+      return true;
+    }
+
+    if (status === "loading") {
+      return true;
+    }
+
+    return (
+      userPermissions.includes("*") || userPermissions.includes(permission)
+    );
+  };
+  const roleLabelMap: Record<string, string> = {
+    SUPER_ADMIN: "Super Admin",
+    ADMIN: "Admin",
+    MANAGER: "Manager",
+    USER: "User",
+  };
+  const roleLabel = adminRole
+    ? (roleLabelMap[adminRole] ?? adminRole)
+    : status === "loading"
+      ? "กำลังโหลด Role..."
+      : "ไม่พบข้อมูล Role";
 
   // Update clock effect
   useEffect(() => {
@@ -74,24 +109,56 @@ export default function AdminLayout({
       path: "/admin",
       icon: ParkingSquare,
       section: "admin",
+      permission: "dashboard:view",
     },
     {
       label: "รถยนต์ในลานจอด",
       path: "/admin/vehicles",
       icon: Car,
       section: "admin",
+      permission: "vehicle:view",
     },
     {
       label: "รหัสคูปอง Wi-Fi",
       path: "/admin/vouchers",
       icon: Wifi,
       section: "admin",
+      permission: "voucher:view",
     },
     {
       label: "ประวัติชำระเงิน",
       path: "/admin/payments",
       icon: Receipt,
       section: "admin",
+      permission: "payment:view",
+    },
+    {
+      label: "จัดการผู้ใช้",
+      path: "/admin/users",
+      icon: Users,
+      section: "access",
+      permission: "user:view",
+    },
+    {
+      label: "ประวัติการจัดการผู้ใช้",
+      path: "/admin/user-logs",
+      icon: Activity,
+      section: "access",
+      permission: "audit-log:view",
+    },
+    {
+      label: "จัดการสิทธิ์",
+      path: "/admin/permissions",
+      icon: ShieldCheck,
+      section: "access",
+      permission: "permission:view",
+    },
+    {
+      label: "ประวัติการจัดการสิทธิ์",
+      path: "/admin/permission-logs",
+      icon: KeyRound,
+      section: "access",
+      permission: "permission-log:view",
     },
     {
       label: "ค้นหาข้อมูลค่าบริการ",
@@ -101,11 +168,18 @@ export default function AdminLayout({
       section: "customer",
     },
   ];
+  const adminMenuItems = menuItems.filter(
+    (item) => item.section === "admin" && hasPermission(item.permission),
+  );
+  const accessMenuItems = menuItems.filter(
+    (item) => item.section === "access" && hasPermission(item.permission),
+  );
 
   // Get current page header title
+  const currentMenuItem = menuItems.find((item) => isActive(item.path));
+  const canAccessCurrentPage = hasPermission(currentMenuItem?.permission);
   const getHeaderTitle = () => {
-    const activeItem = menuItems.find((item) => isActive(item.path));
-    return activeItem ? activeItem.label : "ผู้ดูแลระบบ";
+    return currentMenuItem ? currentMenuItem.label : "ผู้ดูแลระบบ";
   };
 
   return (
@@ -159,13 +233,12 @@ export default function AdminLayout({
             {/* Mobile Nav List */}
             <nav className="space-y-4">
               {/* Section: ผู้ดูแลระบบ */}
-              <div className="space-y-1.5">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
-                  ผู้ดูแลระบบ
-                </div>
-                {menuItems
-                  .filter((item) => item.section === "admin")
-                  .map((item) => {
+              {adminMenuItems.length > 0 && (
+                <div className="space-y-1.5">
+                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
+                    เมนูหลัก
+                  </div>
+                  {adminMenuItems.map((item) => {
                     const Icon = item.icon;
                     const active = isActive(item.path);
                     return (
@@ -189,15 +262,53 @@ export default function AdminLayout({
                       </Link>
                     );
                   })}
-              </div>
+                </div>
+              )}
+
+              {/* Section: สิทธิ์และผู้ใช้ */}
+              {accessMenuItems.length > 0 && (
+                <div className="space-y-1.5">
+                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
+                    สิทธิ์และผู้ใช้
+                  </div>
+                  {accessMenuItems.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActive(item.path);
+                    return (
+                      <Link
+                        key={item.path}
+                        href={item.path}
+                        onClick={() => setIsMobileSidebarOpen(false)}
+                        className={`flex items-center justify-between px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+                          active
+                            ? "bg-primary/10 text-primary border border-primary/20"
+                            : "text-muted-foreground hover:text-white hover:bg-[#121418] border border-transparent"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <Icon className="size-4" />
+                          {item.label}
+                        </span>
+                        {active && (
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Section: ลูกค้า */}
-              <div className="space-y-1.5">
+              {/* <div className="space-y-1.5">
                 <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
                   ลูกค้า
                 </div>
                 {menuItems
-                  .filter((item) => item.section === "customer")
+                  .filter(
+                    (item) =>
+                      item.section === "customer" &&
+                      hasPermission(item.permission),
+                  )
                   .map((item) => {
                     const Icon = item.icon;
                     const active = isActive(item.path);
@@ -224,7 +335,7 @@ export default function AdminLayout({
                       </Link>
                     );
                   })}
-              </div>
+              </div> */}
             </nav>
           </div>
 
@@ -236,11 +347,14 @@ export default function AdminLayout({
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold text-white truncate">
-                  {adminName || "Admin User"}
+                  {adminName || "ผู้ดูแลระบบ"}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
                   {adminEmail || "admin@carpark.com"}
                 </p>
+                <span className="mt-1 inline-flex rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                  {roleLabel}
+                </span>
               </div>
             </div>
 
@@ -282,22 +396,21 @@ export default function AdminLayout({
                   PARKING
                 </span>
               </h1>
-              <p className="text-xs mt-0.5 text-muted-foreground uppercase tracking-widest">
-                Admin Dashboard
+              <p className="text-xs mt-0.5 text-muted-foreground tracking-widest">
+                Management System
               </p>
             </div>
           </Link>
 
           {/* Nav List */}
-          <nav className="space-y-4">
+          <nav className="space-y-10">
             {/* Section: ผู้ดูแลระบบ */}
-            <div className="space-y-1.5">
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
-                ผู้ดูแลระบบ
-              </div>
-              {menuItems
-                .filter((item) => item.section === "admin")
-                .map((item) => {
+            {adminMenuItems.length > 0 && (
+              <div className="space-y-1.5">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
+                  เมนูหลัก
+                </div>
+                {adminMenuItems.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.path);
                   return (
@@ -320,15 +433,52 @@ export default function AdminLayout({
                     </Link>
                   );
                 })}
-            </div>
+              </div>
+            )}
+
+            {/* Section: สิทธิ์และผู้ใช้ */}
+            {accessMenuItems.length > 0 && (
+              <div className="space-y-1.5">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
+                  สิทธิ์และผู้ใช้
+                </div>
+                {accessMenuItems.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.path);
+                  return (
+                    <Link
+                      key={item.path}
+                      href={item.path}
+                      className={`flex items-center justify-between px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+                        active
+                          ? "bg-primary/10 text-primary border border-primary/20"
+                          : "text-muted-foreground hover:text-white hover:bg-[#121418] border border-transparent"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <Icon className="size-4" />
+                        {item.label}
+                      </span>
+                      {active && (
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Section: ลูกค้า */}
-            <div className="space-y-1.5">
+            {/* <div className="space-y-1.5">
               <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
                 ลูกค้า
               </div>
               {menuItems
-                .filter((item) => item.section === "customer")
+                .filter(
+                  (item) =>
+                    item.section === "customer" &&
+                    hasPermission(item.permission),
+                )
                 .map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.path);
@@ -354,7 +504,7 @@ export default function AdminLayout({
                     </Link>
                   );
                 })}
-            </div>
+            </div> */}
           </nav>
         </div>
 
@@ -366,11 +516,14 @@ export default function AdminLayout({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-white truncate">
-                {adminName || "Admin User"}
+                {adminName || "ผู้ดูแลระบบ"}
               </p>
               <p className="text-xs text-muted-foreground truncate">
                 {adminEmail || "admin@carpark.com"}
               </p>
+              <span className="mt-1 inline-flex rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                {roleLabel}
+              </span>
             </div>
           </div>
 
@@ -439,7 +592,16 @@ export default function AdminLayout({
 
         {/* Dynamic page content */}
         <div className="p-4 sm:p-6 space-y-6 w-full mx-auto">
-          {children}
+          {canAccessCurrentPage ? (
+            children
+          ) : (
+            <div className="rounded-lg border border-destructive/25 bg-destructive/10 p-6 text-sm text-destructive">
+              <p className="font-bold">ไม่มีสิทธิ์เข้าถึงหน้านี้</p>
+              <p className="mt-1 text-xs">
+                กรุณาติดต่อผู้ดูแลระบบเพื่อเปิดสิทธิ์การมองเห็นเมนูนี้
+              </p>
+            </div>
+          )}
         </div>
       </main>
     </div>

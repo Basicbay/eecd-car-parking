@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 interface AlertDialogProps {
   isOpen: boolean
   onClose: () => void
-  onConfirm: () => void
+  onConfirm: () => void | Promise<void>
   title: string
   description: string
   cancelText?: string
