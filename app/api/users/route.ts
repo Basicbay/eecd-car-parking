@@ -9,7 +9,7 @@ const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "")
 
 const getUsersUrl = (searchParams?: URLSearchParams) => {
   const apiBaseUrl = trimTrailingSlash(
-    process.env.AUTH_API_BASE_URL ?? "http://localhost:3000/api",
+    process.env.NEXT_PUBLIC_API ?? "http://localhost:3000/api",
   )
   const query = searchParams?.toString()
 

@@ -34,7 +34,7 @@ Default ports:
 Auth integration:
 - Frontend uses NextAuth credentials provider.
 - Backend login endpoint is POST /api/auth/login.
-- Frontend env should use AUTH_API_BASE_URL=http://localhost:3000/api.
+- Frontend env should use NEXT_PUBLIC_API
 
 ---
 

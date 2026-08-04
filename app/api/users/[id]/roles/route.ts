@@ -15,7 +15,7 @@ const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "")
 
 const getRolesUrl = (id: string) => {
   const apiBaseUrl = trimTrailingSlash(
-    process.env.AUTH_API_BASE_URL ?? "http://localhost:3000/api",
+    process.env.NEXT_PUBLIC_API ?? "http://localhost:3000/api",
   )
 
   return `${apiBaseUrl}/users/${id}/roles`

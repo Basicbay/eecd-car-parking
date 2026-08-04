@@ -1,6 +1,7 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { getServerSession } from "next-auth/next"
+import { buildAuthApiUrl } from "@/lib/api-url"
 
 interface ApiEnvelope<TData> {
   success?: boolean
@@ -34,18 +35,12 @@ interface JwtPayload {
   sessionId?: string
 }
 
-const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "")
-
 const getLoginUrl = () => {
   if (process.env.AUTH_LOGIN_URL) {
     return process.env.AUTH_LOGIN_URL
   }
 
-  const apiBaseUrl = trimTrailingSlash(
-    process.env.AUTH_API_BASE_URL ?? "http://localhost:3000/api",
-  )
-
-  return `${apiBaseUrl}/auth/login`
+  return buildAuthApiUrl("/login")
 }
 
 const getProfileUrl = () => {
@@ -53,11 +48,7 @@ const getProfileUrl = () => {
     return process.env.AUTH_PROFILE_URL
   }
 
-  const apiBaseUrl = trimTrailingSlash(
-    process.env.AUTH_API_BASE_URL ?? "http://localhost:3000/api",
-  )
-
-  return `${apiBaseUrl}/auth/profile`
+  return buildAuthApiUrl("/profile")
 }
 
 const unwrapApiData = <TData>(payload: unknown): TData | null => {
